@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "input_1": "input_1",
+    "input_2": "input_2",
+    "author_fingerprint": "author_fingerprint",
+    "animal_id": 1,
+    "likes": 3,
+    "report_count": 1,
+    "created_at": 1756107293778,
+    "updated_at": 1756107293778,
+    "deleted_at": null
+  },
+  {
+    "id": 2,
+    "input_1": "input_1",
+    "input_2": "input_2",
+    "author_fingerprint": "author_fingerprint",
+    "animal_id": 1,
+    "likes": 1,
+    "report_count": 1,
+    "created_at": 1756107293778,
+    "updated_at": 1756107293778,
+    "deleted_at": null
+  },
+  {
+    "id": 3,
+    "input_1": "input_1",
+    "input_2": "input_2",
+    "author_fingerprint": "author_fingerprint",
+    "animal_id": 1,
+    "likes": 1,
+    "report_count": 1,
+    "created_at": 1756107293778,
+    "updated_at": 1756107293778,
+    "deleted_at": null
+  }
+]
