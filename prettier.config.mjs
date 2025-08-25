@@ -5,7 +5,7 @@
 const config = {
   trailingComma: 'es5',
   tabWidth: 2,
-  printWidth: 120,
+  printWidth: 100,
   semi: false,
   singleQuote: true,
   plugins: ['prettier-plugin-tailwindcss'],

@@ -1,4 +1,3 @@
-import MinecraftButton from '@/components/ui/minecraft-button'
 import Canvas from '@/app/_components/canvas'
 import NewPunDialog from '@/app/_components/new-pun-dialog'
 
@@ -8,9 +7,7 @@ export default function Home() {
       <Canvas />
 
       <div className="absolute bottom-24 left-1/2 -translate-x-1/2">
-        <NewPunDialog>
-          <MinecraftButton>나도 말장난 하기</MinecraftButton>
-        </NewPunDialog>
+        <NewPunDialog />
       </div>
     </div>
   )
