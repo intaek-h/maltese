@@ -1,5 +1,5 @@
 import Canvas from '@/app/_components/canvas'
-import NewPunDialog from '@/app/_components/new-pun-dialog'
+import NewPunContainer from '@/app/_components/new-pun-container'
 
 export default function Home() {
   return (
@@ -7,7 +7,7 @@ export default function Home() {
       <Canvas />
 
       <div className="absolute bottom-24 left-1/2 -translate-x-1/2">
-        <NewPunDialog />
+        <NewPunContainer />
       </div>
     </div>
   )

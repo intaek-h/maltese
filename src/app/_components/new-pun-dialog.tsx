@@ -21,7 +21,6 @@ import ostrich from '@/animals/ostrich-1.svg'
 import rabbit from '@/animals/rabbit-1.svg'
 import husky from '@/animals/siberian-husky-1.svg'
 import LegoButton from '@/components/ui/lego-button'
-import NewPunForm from './new-pun-form'
 
 type Animal = { key: string; name: string; src: string }
 
@@ -47,28 +46,33 @@ const ANIMALS: Animal[] = [
 ]
 const TWEEN_FACTOR_BASE = 0.52
 
-export default function NewPunDialog() {
-  const [isOpen, setIsOpen] = useState(false)
-
+export default function NewPunDialog({
+  isOpen,
+  setIsOpen,
+  openForm,
+  children,
+}: {
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
+  openForm: () => void
+  children: React.ReactNode
+}) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <LegoButton onClick={() => setIsOpen(true)} style={{ opacity: isOpen ? 0 : 1 }}>
-          나도 말장난 하기
-        </LegoButton>
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
 
       <DialogContent
         className="h-screen rounded-none border-0 bg-transparent p-0 sm:w-screen sm:max-w-none"
         showCloseButton={false}
       >
-        <div className="flex h-full w-full max-w-[calc(100vw-2rem)] flex-col">
+        <div className="flex h-full w-full max-w-[calc(100vw-2rem)] flex-col sm:max-w-[100vw]">
           <DialogHeader className="items-center py-16">
-            <DialogTitle className="text-secondary text-2xl font-bold">
+            <DialogTitle className="text-secondary text-3xl font-bold">
               먼저 마음에 드는 동물을 고릅니다
             </DialogTitle>
             <DialogDescription className="text-secondary text-base">
-              좌우로 스와이프 해보세요
+              <span className="hidden sm:block">좌우로 드래그 해보세요</span>
+              <span className="block sm:hidden">좌우로 스와이프 해보세요</span>
             </DialogDescription>
           </DialogHeader>
 
@@ -83,7 +87,7 @@ export default function NewPunDialog() {
               <LegoButton variant="secondary" onClick={() => setIsOpen(false)}>
                 취소
               </LegoButton>
-              <LegoButton>고르기</LegoButton>
+              <LegoButton onClick={openForm}>고르기</LegoButton>
             </div>
           </div>
         </div>
