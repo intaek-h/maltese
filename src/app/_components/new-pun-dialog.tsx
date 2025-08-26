@@ -78,8 +78,8 @@ export default function NewPunDialog() {
             </div>
           </div>
 
-          <div className="flex justify-center bg-transparent pb-24">
-            <div className="flex gap-4">
+          <div className="flex flex-1 justify-center bg-transparent">
+            <div className="m-auto flex h-fit gap-4">
               <LegoButton variant="secondary" onClick={() => setIsOpen(false)}>
                 취소
               </LegoButton>
