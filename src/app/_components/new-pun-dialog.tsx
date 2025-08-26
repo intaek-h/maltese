@@ -62,14 +62,18 @@ export default function NewPunDialog() {
         className="h-screen rounded-none border-0 bg-transparent p-0 sm:w-screen sm:max-w-none"
         showCloseButton={false}
       >
-        <div className="flex h-full w-full flex-col">
+        <div className="flex h-full w-full max-w-[calc(100vw-2rem)] flex-col">
           <DialogHeader className="items-center py-16">
-            <DialogTitle className="text-secondary text-2xl font-bold">먼저 마음에 드는 동물을 고릅니다</DialogTitle>
-            <DialogDescription className="text-secondary text-base">좌우로 스와이프 해보세요</DialogDescription>
+            <DialogTitle className="text-secondary text-2xl font-bold">
+              먼저 마음에 드는 동물을 고릅니다
+            </DialogTitle>
+            <DialogDescription className="text-secondary text-base">
+              좌우로 스와이프 해보세요
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="relative flex-1">
-            <div className="absolute top-0 left-1/2 flex min-h-0 w-full grow -translate-x-1/2 items-center justify-center">
+          <div className="relative h-[50vh] overflow-hidden">
+            <div className="flex h-full w-full items-center justify-center">
               <AnimalCarousel animals={ANIMALS} />
             </div>
           </div>
@@ -90,12 +94,19 @@ export default function NewPunDialog() {
 
 function AnimalCarousel({ animals }: { animals: Animal[] }) {
   const options = useMemo<EmblaOptionsType>(
-    () => ({ align: 'center', dragFree: false, loop: true, skipSnaps: false, containScroll: 'trimSnaps' }),
+    () => ({
+      align: 'center',
+      dragFree: false,
+      loop: true,
+      skipSnaps: false,
+      containScroll: 'trimSnaps',
+    }),
     []
   )
   const [emblaRef, emblaApi] = useEmblaCarousel(options)
 
-  const numberWithinRange = (number: number, min: number, max: number) => Math.min(Math.max(number, min), max)
+  const numberWithinRange = (number: number, min: number, max: number) =>
+    Math.min(Math.max(number, min), max)
 
   const tweenFactor = useRef(0)
   const tweenNodes = useRef<HTMLElement[]>([])
@@ -148,19 +159,26 @@ function AnimalCarousel({ animals }: { animals: Animal[] }) {
     setTweenFactor(emblaApi)
     tweenScale(emblaApi)
 
-    emblaApi.on('reInit', setTweenFactor).on('reInit', tweenScale).on('scroll', tweenScale).on('slideFocus', tweenScale)
+    emblaApi
+      .on('reInit', setTweenFactor)
+      .on('reInit', tweenScale)
+      .on('scroll', tweenScale)
+      .on('slideFocus', tweenScale)
   }, [emblaApi, tweenScale])
 
   return (
-    <div className="w-full">
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="-ml-4 flex touch-pan-y select-none">
+    <div className="h-full w-full">
+      <div className="h-full overflow-hidden" ref={emblaRef}>
+        <div className="-ml-4 flex h-full touch-pan-y select-none">
           {animals.map((animal, index) => {
             return (
-              <div key={animal.key} className="flex-[0_0_75%] pl-4 sm:flex-[0_0_60%] md:flex-[0_0_50%]">
+              <div
+                key={animal.key}
+                className="h-full flex-[0_0_75%] pl-4 sm:flex-[0_0_60%] md:flex-[0_0_50%]"
+              >
                 <div
                   className={
-                    'mx-auto flex w-full items-center justify-center rounded-lg bg-transparent transition-transform duration-300 ease-out'
+                    'mx-auto flex h-[80%] w-full items-center justify-center rounded-lg bg-transparent transition-transform duration-300 ease-out'
                   }
                   ref={(el) => {
                     if (el) tweenNodes.current[index] = el
@@ -170,11 +188,13 @@ function AnimalCarousel({ animals }: { animals: Animal[] }) {
                   <img
                     src={animal.src}
                     alt={animal.name}
-                    className={'max-h-[60vh] w-auto scale-100 transition-transform'}
+                    className={'h-full w-auto scale-100 transition-transform'}
                   />
                 </div>
                 <div className="bg-secondary mx-auto mt-4 w-fit rounded-full px-2 py-1">
-                  <p className="text-shadow-lego text-center text-base font-semibold">{animal.name}</p>
+                  <p className="text-shadow-lego text-center text-base font-semibold">
+                    {animal.name}
+                  </p>
                 </div>
               </div>
             )
