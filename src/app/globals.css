@@ -128,7 +128,7 @@
 }
 
 @theme {
-  --animate-jump: jump 1s both;
+  --animate-jump: jump 1s 0.3s both; /* 0.3s delay */
 
   @keyframes jump {
     0%,
