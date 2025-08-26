@@ -128,16 +128,16 @@
 }
 
 @theme {
-  --animate-jump: jump 1s 0.3s both; /* 0.3s delay */
+  --animate-jump: jump 1s 0.15s both; /* 0.3s delay */
 
   @keyframes jump {
     0%,
     100% {
       transform: scale(1);
     }
-    10% {
+    /* 10% {
       transform: scale(0.8);
-    }
+    } */
     50% {
       transform: scale(1.2);
     }
