@@ -12,6 +12,17 @@ import {
 import LegoButton from '@/components/ui/lego-button'
 import NewPunForm from './new-pun-form'
 import { ArrowLeftIcon } from 'lucide-react'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer'
+import { Button } from '@/components/ui/button'
 
 export default function NewPunFormDialog({
   isOpen,
@@ -43,7 +54,28 @@ export default function NewPunFormDialog({
             </DialogHeader>
 
             <div className="relative h-[50vh] overflow-hidden">
-              <div className="flex h-full w-full items-center justify-center">
+              <div className="flex h-full w-full flex-col items-center justify-center gap-4">
+                <div className="flex flex-col items-center">
+                  <Drawer>
+                    <DrawerTrigger>
+                      <p className="text-secondary text-lg font-semibold underline underline-offset-4">
+                        예시를 보고싶어요!
+                      </p>
+                    </DrawerTrigger>
+                    <DrawerContent>
+                      <DrawerHeader>
+                        <DrawerTitle>Are you absolutely sure?</DrawerTitle>
+                        <DrawerDescription>This action cannot be undone.</DrawerDescription>
+                      </DrawerHeader>
+                      <DrawerFooter>
+                        <Button>Submit</Button>
+                        <DrawerClose asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DrawerClose>
+                      </DrawerFooter>
+                    </DrawerContent>
+                  </Drawer>
+                </div>
                 <NewPunForm />
               </div>
             </div>
