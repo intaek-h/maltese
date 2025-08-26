@@ -25,7 +25,7 @@ export default function NewPunContainer() {
         isOpen={openedDialog === 'form'}
         setIsOpen={(isOpen) => {
           if (isOpen) setOpenedDialog('form')
-          else setOpenedDialog('')
+          else setOpenedDialog('animal')
         }}
       />
     </div>

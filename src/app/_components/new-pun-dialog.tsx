@@ -67,12 +67,16 @@ export default function NewPunDialog({
       >
         <div className="flex h-full w-full max-w-[calc(100vw-2rem)] flex-col sm:max-w-[100vw]">
           <DialogHeader className="items-center py-16">
-            <DialogTitle className="text-secondary text-3xl font-bold">
-              먼저 마음에 드는 동물을 고릅니다
+            <DialogTitle className="text-secondary text-3xl font-bold break-keep">
+              마음에 드는 동물을 골라보세요
             </DialogTitle>
             <DialogDescription className="text-secondary text-base">
-              <span className="hidden sm:block">좌우로 드래그 해보세요</span>
-              <span className="block sm:hidden">좌우로 스와이프 해보세요</span>
+              <span className="hidden sm:block">
+                좌우로 드래그 하면 다른 동물을 고를 수 있어요.
+              </span>
+              <span className="block sm:hidden">
+                좌우로 스와이프 하면 다른 동물을 고를 수 있어요.
+              </span>
             </DialogDescription>
           </DialogHeader>
 
