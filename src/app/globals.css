@@ -126,3 +126,20 @@
     text-shadow: 0 2px 0 rgb(0 0 0 / 25%);
   }
 }
+
+@theme {
+  --animate-jump: jump 1s both;
+
+  @keyframes jump {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    10% {
+      transform: scale(0.8);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+  }
+}

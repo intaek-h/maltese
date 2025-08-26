@@ -46,7 +46,7 @@ const ANIMALS: Animal[] = [
 ]
 const TWEEN_FACTOR_BASE = 0.52
 
-export default function NewPunDialog({
+export default function NewPunAnimalDialog({
   isOpen,
   setIsOpen,
   openForm,
@@ -66,7 +66,7 @@ export default function NewPunDialog({
         showCloseButton={false}
       >
         <div className="flex h-full w-full max-w-[calc(100vw-2rem)] flex-col sm:max-w-[100vw]">
-          <DialogHeader className="items-center py-16">
+          <DialogHeader className="animate-jump items-center py-16">
             <DialogTitle className="text-secondary text-3xl font-bold break-keep">
               마음에 드는 동물을 골라보세요
             </DialogTitle>
@@ -89,7 +89,7 @@ export default function NewPunDialog({
           <div className="flex flex-1 justify-center bg-transparent">
             <div className="m-auto flex h-fit gap-4">
               <LegoButton variant="secondary" onClick={() => setIsOpen(false)}>
-                취소
+                닫기
               </LegoButton>
               <LegoButton onClick={openForm}>고르기</LegoButton>
             </div>

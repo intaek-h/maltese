@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import LegoButton from '@/components/ui/lego-button'
 import NewPunForm from './new-pun-form'
+import { ArrowLeftIcon } from 'lucide-react'
 
 export default function NewPunFormDialog({
   isOpen,
@@ -32,7 +33,7 @@ export default function NewPunFormDialog({
           showCloseButton={false}
         >
           <div className="flex h-full w-full max-w-[calc(100vw-2rem)] flex-col">
-            <DialogHeader className="items-center py-16">
+            <DialogHeader className="animate-jump items-center py-16">
               <DialogTitle className="text-secondary text-3xl font-bold">
                 두 줄로 말장난을 만들어요
               </DialogTitle>
@@ -50,6 +51,7 @@ export default function NewPunFormDialog({
             <div className="flex flex-1 justify-center bg-transparent">
               <div className="m-auto flex h-fit gap-4">
                 <LegoButton variant="secondary" onClick={() => setIsOpen(false)}>
+                  <ArrowLeftIcon className="mr-2" />
                   뒤로
                 </LegoButton>
                 <LegoButton>저장하기</LegoButton>
