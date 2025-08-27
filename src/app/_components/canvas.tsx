@@ -23,9 +23,23 @@ export default function Canvas() {
     const canvas: HTMLCanvasElement = canvasEl;
     const context: CanvasRenderingContext2D = ctx;
 
+    let logicalWidth = 0;
+    let logicalHeight = 0;
     function sizeCanvasToWindow() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+      // Logical (CSS) size
+      logicalWidth = window.innerWidth;
+      logicalHeight = window.innerHeight;
+      // Apply CSS size for layout
+      canvas.style.width = `${logicalWidth}px`;
+      canvas.style.height = `${logicalHeight}px`;
+      // Backing store size for crisp rendering
+      canvas.width = Math.max(1, Math.round(logicalWidth * dpr));
+      canvas.height = Math.max(1, Math.round(logicalHeight * dpr));
+      // Scale context so we can draw in logical CSS pixels
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
     }
 
     sizeCanvasToWindow();
@@ -52,12 +66,14 @@ export default function Canvas() {
       const velocityY = Math.sin(angle) * speed;
 
       // Initial position
-      const initialX = Math.random() * Math.max(1, canvas.width - width);
-      const initialY = Math.random() * Math.max(1, canvas.height - height);
+      const initialX = Math.random() * Math.max(1, logicalWidth - width);
+      const initialY = Math.random() * Math.max(1, logicalHeight - height);
 
       const moving: MovingAnimal = {
         animal,
         pun,
+        input1: word.input_1,
+        input2: word.input_2,
         x: initialX,
         y: initialY,
         velocityX,
@@ -69,7 +85,7 @@ export default function Canvas() {
       };
 
       // Initialize movement via registry (configures per-type state)
-      initializeMovement(moving, canvas.width, canvas.height);
+      initializeMovement(moving, logicalWidth, logicalHeight);
 
       movingAnimals.push(moving);
     }
@@ -87,7 +103,7 @@ export default function Canvas() {
 
     function update(deltaSeconds: number) {
       for (const moving of movingAnimals) {
-        updateMovement(moving, canvas.width, canvas.height, deltaSeconds);
+        updateMovement(moving, logicalWidth, logicalHeight, deltaSeconds);
       }
     }
 
@@ -110,18 +126,18 @@ export default function Canvas() {
     animationFrameRef.current = window.requestAnimationFrame(loop);
 
     function handleResize() {
-      const previousWidth = canvas.width;
-      const previousHeight = canvas.height;
+      const previousWidth = logicalWidth;
+      const previousHeight = logicalHeight;
       sizeCanvasToWindow();
-      const scaleX = canvas.width / Math.max(1, previousWidth);
-      const scaleY = canvas.height / Math.max(1, previousHeight);
+      const scaleX = logicalWidth / Math.max(1, previousWidth);
+      const scaleY = logicalHeight / Math.max(1, previousHeight);
       for (const moving of movingAnimals) {
         handleResizeForMovingAnimal(
           moving,
           scaleX,
           scaleY,
-          canvas.width,
-          canvas.height,
+          logicalWidth,
+          logicalHeight,
         );
       }
     }
@@ -130,8 +146,8 @@ export default function Canvas() {
 
     function getCanvasPoint(evt: PointerEvent) {
       const rect = canvas.getBoundingClientRect();
-      const scaleX = rect.width > 0 ? canvas.width / rect.width : 1;
-      const scaleY = rect.height > 0 ? canvas.height / rect.height : 1;
+      const scaleX = rect.width > 0 ? logicalWidth / rect.width : 1;
+      const scaleY = rect.height > 0 ? logicalHeight / rect.height : 1;
       const x = (evt.clientX - rect.left) * scaleX;
       const y = (evt.clientY - rect.top) * scaleY;
       return { x, y };

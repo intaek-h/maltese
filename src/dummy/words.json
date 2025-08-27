@@ -1,8 +1,8 @@
 [
   {
     "id": 1,
-    "input_1": "input_1",
-    "input_2": "input_2",
+    "input_1": "가장 폭력적인 동물은?",
+    "input_2": "Panda",
     "author_fingerprint": "author_fingerprint",
     "animal_id": 1,
     "likes": 3,
@@ -13,8 +13,8 @@
   },
   {
     "id": 2,
-    "input_1": "input_1",
-    "input_2": "input_2",
+    "input_1": "푸앵카레의 추측",
+    "input_2": "포항카레의 추측",
     "author_fingerprint": "author_fingerprint",
     "animal_id": 2,
     "likes": 1,
@@ -25,8 +25,8 @@
   },
   {
     "id": 3,
-    "input_1": "input_1",
-    "input_2": "input_2",
+    "input_1": "제드의 50가지 그림자",
+    "input_2": "",
     "author_fingerprint": "author_fingerprint",
     "animal_id": 3,
     "likes": 1,
@@ -37,8 +37,20 @@
   },
   {
     "id": 4,
-    "input_1": "input_1",
-    "input_2": "input_2",
+    "input_1": "대추나무 사람걸렸네",
+    "input_2": "",
+    "author_fingerprint": "author_fingerprint",
+    "animal_id": 4,
+    "likes": 1,
+    "report_count": 1,
+    "created_at": 1756107293778,
+    "updated_at": 1756107293778,
+    "deleted_at": null
+  },
+  {
+    "id": 5,
+    "input_1": "레몬나르고 빚갚으리오",
+    "input_2": "",
     "author_fingerprint": "author_fingerprint",
     "animal_id": 4,
     "likes": 1,

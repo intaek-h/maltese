@@ -24,6 +24,8 @@ export type Word = {
 export type MovingAnimal = {
   animal: Animal;
   pun: string;
+  input1?: string;
+  input2?: string;
   x: number;
   y: number;
   velocityX: number;
