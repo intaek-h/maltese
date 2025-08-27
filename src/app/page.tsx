@@ -1,5 +1,5 @@
-import Canvas from '@/app/_components/canvas'
-import NewPunContainer from '@/app/_components/new-pun-container'
+import Canvas from "@/app/_components/canvas";
+import NewPunContainer from "@/app/_components/new-pun-container";
 
 export default function Home() {
   return (
@@ -10,5 +10,5 @@ export default function Home() {
         <NewPunContainer />
       </div>
     </div>
-  )
+  );
 }

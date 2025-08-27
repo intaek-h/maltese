@@ -1,6 +1,21 @@
-'use client'
+"use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type {
+  EmblaCarouselType,
+  EmblaEventType,
+  EmblaOptionsType,
+} from "embla-carousel";
+import useEmblaCarousel from "embla-carousel-react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import bulldog from "@/animals/bulldog-1.svg";
+import clown from "@/animals/clown-1.svg";
+import crocodile from "@/animals/crocodile-1.svg";
+import frog from "@/animals/frog-1.svg";
+import lion from "@/animals/lion-1.svg";
+import ostrich from "@/animals/ostrich-1.svg";
+import rabbit from "@/animals/rabbit-1.svg";
+import husky from "@/animals/siberian-husky-1.svg";
 import {
   Dialog,
   DialogContent,
@@ -8,43 +23,32 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import useEmblaCarousel from 'embla-carousel-react'
-import type { EmblaCarouselType, EmblaEventType, EmblaOptionsType } from 'embla-carousel'
+} from "@/components/ui/dialog";
+import LegoButton from "@/components/ui/lego-button";
 
-import bulldog from '@/animals/bulldog-1.svg'
-import clown from '@/animals/clown-1.svg'
-import crocodile from '@/animals/crocodile-1.svg'
-import frog from '@/animals/frog-1.svg'
-import lion from '@/animals/lion-1.svg'
-import ostrich from '@/animals/ostrich-1.svg'
-import rabbit from '@/animals/rabbit-1.svg'
-import husky from '@/animals/siberian-husky-1.svg'
-import LegoButton from '@/components/ui/lego-button'
-
-type Animal = { key: string; name: string; src: string }
+type Animal = { key: string; name: string; src: string };
 
 function resolveSvgSrc(input: unknown): string {
-  if (!input) return ''
-  if (typeof input === 'string') return input
+  if (!input) return "";
+  if (typeof input === "string") return input;
   // @ts-expect-error: runtime guard for Next static asset objects
-  if (typeof input.src === 'string') return input.src
+  if (typeof input.src === "string") return input.src;
   // @ts-expect-error: runtime guard for possible default export string
-  if (typeof input.default === 'string') return input.default
-  return ''
+  if (typeof input.default === "string") return input.default;
+  return "";
 }
 
 const ANIMALS: Animal[] = [
-  { key: 'bulldog', name: 'Bulldog', src: resolveSvgSrc(bulldog) },
-  { key: 'clown', name: 'Clown', src: resolveSvgSrc(clown) },
-  { key: 'crocodile', name: 'Crocodile', src: resolveSvgSrc(crocodile) },
-  { key: 'frog', name: 'Frog', src: resolveSvgSrc(frog) },
-  { key: 'lion', name: 'Lion', src: resolveSvgSrc(lion) },
-  { key: 'ostrich', name: 'Ostrich', src: resolveSvgSrc(ostrich) },
-  { key: 'rabbit', name: 'Rabbit', src: resolveSvgSrc(rabbit) },
-  { key: 'husky', name: 'Siberian Husky', src: resolveSvgSrc(husky) },
-]
-const TWEEN_FACTOR_BASE = 0.52
+  { key: "bulldog", name: "Bulldog", src: resolveSvgSrc(bulldog) },
+  { key: "clown", name: "Clown", src: resolveSvgSrc(clown) },
+  { key: "crocodile", name: "Crocodile", src: resolveSvgSrc(crocodile) },
+  { key: "frog", name: "Frog", src: resolveSvgSrc(frog) },
+  { key: "lion", name: "Lion", src: resolveSvgSrc(lion) },
+  { key: "ostrich", name: "Ostrich", src: resolveSvgSrc(ostrich) },
+  { key: "rabbit", name: "Rabbit", src: resolveSvgSrc(rabbit) },
+  { key: "husky", name: "Siberian Husky", src: resolveSvgSrc(husky) },
+];
+const TWEEN_FACTOR_BASE = 0.52;
 
 export default function NewPunAnimalDialog({
   isOpen,
@@ -52,10 +56,10 @@ export default function NewPunAnimalDialog({
   openForm,
   children,
 }: {
-  isOpen: boolean
-  setIsOpen: (isOpen: boolean) => void
-  openForm: () => void
-  children: React.ReactNode
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  openForm: () => void;
+  children: React.ReactNode;
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -97,82 +101,87 @@ export default function NewPunAnimalDialog({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function AnimalCarousel({ animals }: { animals: Animal[] }) {
   const options = useMemo<EmblaOptionsType>(
     () => ({
-      align: 'center',
+      align: "center",
       dragFree: false,
       loop: true,
       skipSnaps: false,
-      containScroll: 'trimSnaps',
+      containScroll: "trimSnaps",
     }),
-    []
-  )
-  const [emblaRef, emblaApi] = useEmblaCarousel(options)
+    [],
+  );
+  const [emblaRef, emblaApi] = useEmblaCarousel(options);
 
   const numberWithinRange = (number: number, min: number, max: number) =>
-    Math.min(Math.max(number, min), max)
+    Math.min(Math.max(number, min), max);
 
-  const tweenFactor = useRef(0)
-  const tweenNodes = useRef<HTMLElement[]>([])
+  const tweenFactor = useRef(0);
+  const tweenNodes = useRef<HTMLElement[]>([]);
 
   const setTweenFactor = useCallback((emblaApi: EmblaCarouselType) => {
-    tweenFactor.current = TWEEN_FACTOR_BASE * emblaApi.scrollSnapList().length
-  }, [])
+    tweenFactor.current = TWEEN_FACTOR_BASE * emblaApi.scrollSnapList().length;
+  }, []);
 
-  const tweenScale = useCallback((emblaApi: EmblaCarouselType, eventName?: EmblaEventType) => {
-    const engine = emblaApi.internalEngine()
-    const scrollProgress = emblaApi.scrollProgress()
-    const slidesInView = emblaApi.slidesInView()
-    const isScrollEvent = eventName === 'scroll'
+  // biome-ignore lint/correctness/useExhaustiveDependencies: doesn't need to be re-run
+  const tweenScale = useCallback(
+    (emblaApi: EmblaCarouselType, eventName?: EmblaEventType) => {
+      const engine = emblaApi.internalEngine();
+      const scrollProgress = emblaApi.scrollProgress();
+      const slidesInView = emblaApi.slidesInView();
+      const isScrollEvent = eventName === "scroll";
 
-    emblaApi.scrollSnapList().forEach((scrollSnap, snapIndex) => {
-      let diffToTarget = scrollSnap - scrollProgress
-      const slidesInSnap = engine.slideRegistry[snapIndex]
+      emblaApi.scrollSnapList().forEach((scrollSnap, snapIndex) => {
+        let diffToTarget = scrollSnap - scrollProgress;
+        const slidesInSnap = engine.slideRegistry[snapIndex];
 
-      slidesInSnap.forEach((slideIndex) => {
-        if (isScrollEvent && !slidesInView.includes(slideIndex)) return
+        slidesInSnap.forEach((slideIndex) => {
+          if (isScrollEvent && !slidesInView.includes(slideIndex)) return;
 
-        if (engine.options.loop) {
-          engine.slideLooper.loopPoints.forEach((loopItem) => {
-            const target = loopItem.target()
+          if (engine.options.loop) {
+            engine.slideLooper.loopPoints.forEach((loopItem) => {
+              const target = loopItem.target();
 
-            if (slideIndex === loopItem.index && target !== 0) {
-              const sign = Math.sign(target)
+              if (slideIndex === loopItem.index && target !== 0) {
+                const sign = Math.sign(target);
 
-              if (sign === -1) {
-                diffToTarget = scrollSnap - (1 + scrollProgress)
+                if (sign === -1) {
+                  diffToTarget = scrollSnap - (1 + scrollProgress);
+                }
+                if (sign === 1) {
+                  diffToTarget = scrollSnap + (1 - scrollProgress);
+                }
               }
-              if (sign === 1) {
-                diffToTarget = scrollSnap + (1 - scrollProgress)
-              }
-            }
-          })
-        }
+            });
+          }
 
-        const tweenValue = 1 - Math.abs(diffToTarget * tweenFactor.current)
-        const scale = numberWithinRange(tweenValue, 0, 1).toString()
-        const tweenNode = tweenNodes.current[slideIndex]
-        tweenNode.style.transform = `scale(${scale})`
-      })
-    })
-  }, [])
+          const tweenValue = 1 - Math.abs(diffToTarget * tweenFactor.current);
+          const scale = numberWithinRange(tweenValue, 0, 1).toString();
+          const tweenNode = tweenNodes.current[slideIndex];
+          tweenNode.style.transform = `scale(${scale})`;
+        });
+      });
+    },
+    [],
+  );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: doesn't need to be re-run
   useEffect(() => {
-    if (!emblaApi) return
+    if (!emblaApi) return;
 
-    setTweenFactor(emblaApi)
-    tweenScale(emblaApi)
+    setTweenFactor(emblaApi);
+    tweenScale(emblaApi);
 
     emblaApi
-      .on('reInit', setTweenFactor)
-      .on('reInit', tweenScale)
-      .on('scroll', tweenScale)
-      .on('slideFocus', tweenScale)
-  }, [emblaApi, tweenScale])
+      .on("reInit", setTweenFactor)
+      .on("reInit", tweenScale)
+      .on("scroll", tweenScale)
+      .on("slideFocus", tweenScale);
+  }, [emblaApi, tweenScale]);
 
   return (
     <div className="h-full w-full">
@@ -186,17 +195,17 @@ function AnimalCarousel({ animals }: { animals: Animal[] }) {
               >
                 <div
                   className={
-                    'mx-auto flex h-[80%] w-full items-center justify-center rounded-lg bg-transparent transition-transform duration-300 ease-out'
+                    "mx-auto flex h-[80%] w-full items-center justify-center rounded-lg bg-transparent transition-transform duration-300 ease-out"
                   }
                   ref={(el) => {
-                    if (el) tweenNodes.current[index] = el
+                    if (el) tweenNodes.current[index] = el;
                   }}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {/** biome-ignore lint/performance/noImgElement: temp */}
                   <img
                     src={animal.src}
                     alt={animal.name}
-                    className={'h-full w-auto scale-100 transition-transform'}
+                    className={"h-full w-auto scale-100 transition-transform"}
                   />
                 </div>
                 <div className="bg-secondary mx-auto mt-4 w-fit rounded-full px-2 py-1">
@@ -205,10 +214,10 @@ function AnimalCarousel({ animals }: { animals: Animal[] }) {
                   </p>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from "react";
 
 export default function NewPunForm() {
-  const firstInputRef = useRef<HTMLInputElement>(null)
+  const firstInputRef = useRef<HTMLInputElement>(null);
 
-  const [firstInputValue, setFirstInputValue] = useState('')
-  const [secondInputValue, setSecondInputValue] = useState('')
+  const [firstInputValue, setFirstInputValue] = useState("");
+  const [secondInputValue, setSecondInputValue] = useState("");
 
   useEffect(() => {
     setTimeout(() => {
-      firstInputRef.current?.focus()
-    }, 100)
-  }, [])
+      firstInputRef.current?.focus();
+    }, 100);
+  }, []);
 
   return (
     <div className="border-primary flex w-[90vw] flex-col rounded-lg border-2 shadow-[4px_4px_0_0_#000] sm:w-[50vw] [&_input]:focus-visible:outline-none">
@@ -33,5 +33,5 @@ export default function NewPunForm() {
         onChange={(e) => setSecondInputValue(e.target.value)}
       />
     </div>
-  )
+  );
 }

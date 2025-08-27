@@ -3,7 +3,7 @@
     "id": 1,
     "name": "dog",
     "image": "https://placehold.co/600x400",
-    "movement_type": "slide",
+    "movement_type": "hop",
     "created_at": 1756107293778,
     "updated_at": 1756107293778,
     "deleted_at": null

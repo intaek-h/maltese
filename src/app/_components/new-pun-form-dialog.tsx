@@ -1,5 +1,7 @@
-'use client'
+"use client";
 
+import { ArrowLeftIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,10 +10,7 @@ import {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import LegoButton from '@/components/ui/lego-button'
-import NewPunForm from './new-pun-form'
-import { ArrowLeftIcon } from 'lucide-react'
+} from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerClose,
@@ -21,17 +20,18 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from '@/components/ui/drawer'
-import { Button } from '@/components/ui/button'
+} from "@/components/ui/drawer";
+import LegoButton from "@/components/ui/lego-button";
+import NewPunForm from "./new-pun-form";
 
 export default function NewPunFormDialog({
   isOpen,
   setIsOpen,
   children,
 }: {
-  isOpen: boolean
-  setIsOpen: (isOpen: boolean) => void
-  children?: React.ReactNode
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  children?: React.ReactNode;
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -65,7 +65,9 @@ export default function NewPunFormDialog({
                     <DrawerContent>
                       <DrawerHeader>
                         <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-                        <DrawerDescription>This action cannot be undone.</DrawerDescription>
+                        <DrawerDescription>
+                          This action cannot be undone.
+                        </DrawerDescription>
                       </DrawerHeader>
                       <DrawerFooter>
                         <Button>Submit</Button>
@@ -82,7 +84,10 @@ export default function NewPunFormDialog({
 
             <div className="flex flex-1 justify-center bg-transparent">
               <div className="m-auto flex h-fit gap-4">
-                <LegoButton variant="secondary" onClick={() => setIsOpen(false)}>
+                <LegoButton
+                  variant="secondary"
+                  onClick={() => setIsOpen(false)}
+                >
                   <ArrowLeftIcon className="mr-2" />
                   뒤로
                 </LegoButton>
@@ -93,5 +98,5 @@ export default function NewPunFormDialog({
         </DialogContent>
       </DialogPortal>
     </Dialog>
-  )
+  );
 }

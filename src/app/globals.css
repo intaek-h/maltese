@@ -1,8 +1,10 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
+/* biome-ignore lint/suspicious/noUnknownAtRules: tailwind */
 @custom-variant dark (&:is(.dark *));
 
+/* biome-ignore lint/suspicious/noUnknownAtRules: tailwind */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -114,9 +116,11 @@
 
 @layer base {
   * {
+    /* biome-ignore lint/suspicious/noUnknownAtRules: tailwind */
     @apply border-border outline-ring/50;
   }
   body {
+    /* biome-ignore lint/suspicious/noUnknownAtRules: tailwind */
     @apply bg-background text-foreground;
   }
 }
@@ -127,6 +131,7 @@
   }
 }
 
+/* biome-ignore lint/suspicious/noUnknownAtRules: tailwind */
 @theme {
   --animate-jump: jump 1s 0.15s both; /* 0.3s delay */
 
