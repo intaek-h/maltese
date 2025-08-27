@@ -6,6 +6,7 @@ import words from "@/dummy/words.json";
 import { drawScene } from "@/lib/canvas/draw";
 import {
   handleResizeForMovingAnimal,
+  initializeMovement,
   updateMovement,
 } from "@/lib/canvas/movement";
 import type { Animal, MovingAnimal, Word } from "@/lib/canvas/types";
@@ -67,17 +68,8 @@ export default function Canvas() {
         isImageLoaded: false,
       };
 
-      // Configure movement-specific state based on animal.movement_type
-      if (animal.movement_type === "hop") {
-        const amplitude = 30 + Math.random() * 50; // px
-        const phase = Math.random() * Math.PI * 2;
-        const speedPhase = 6 + Math.random() * 4; // rad/sec
-        const baseY = Math.min(canvas.height - height, initialY);
-        moving.velocityY = 0;
-        moving.hop = { baseY, amplitude, phase, speed: speedPhase };
-        // Place at a hop offset from the base on first frame
-        moving.y = Math.max(0, baseY - amplitude * Math.abs(Math.sin(phase)));
-      }
+      // Initialize movement via registry (configures per-type state)
+      initializeMovement(moving, canvas.width, canvas.height);
 
       movingAnimals.push(moving);
     }

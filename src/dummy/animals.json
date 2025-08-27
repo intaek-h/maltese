@@ -7,5 +7,32 @@
     "created_at": 1756107293778,
     "updated_at": 1756107293778,
     "deleted_at": null
+  },
+  {
+    "id": 2,
+    "name": "cat",
+    "image": "https://placehold.co/300x400",
+    "movement_type": "zigzag",
+    "created_at": 1756107293778,
+    "updated_at": 1756107293778,
+    "deleted_at": null
+  },
+  {
+    "id": 3,
+    "name": "bird",
+    "image": "https://placehold.co/100x400",
+    "movement_type": "orbit",
+    "created_at": 1756107293778,
+    "updated_at": 1756107293778,
+    "deleted_at": null
+  },
+  {
+    "id": 4,
+    "name": "fish",
+    "image": "https://placehold.co/600x400",
+    "movement_type": "flutter",
+    "created_at": 1756107293778,
+    "updated_at": 1756107293778,
+    "deleted_at": null
   }
 ]

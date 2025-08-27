@@ -39,4 +39,27 @@ export type MovingAnimal = {
     phase: number;
     speed: number;
   };
+  zigzag?: {
+    baseY: number;
+    amplitude: number;
+    phase: number;
+    speed: number;
+  };
+  flutter?: {
+    phase: number;
+    bobAmplitude: number;
+    bobSpeed: number;
+    driftSpeed: number;
+    heading: number;
+  };
+  orbit?: {
+    centerX: number;
+    centerY: number;
+    radius: number;
+    angle: number;
+    angularSpeed: number;
+    direction: 1 | -1;
+    centerVX: number;
+    centerVY: number;
+  };
 };
