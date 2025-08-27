@@ -32,8 +32,8 @@ export type RabbitConfig = {
 };
 
 let rabbitConfig: RabbitConfig = {
-  hopDistance: 100,
-  hopHeight: 60,
+  hopDistance: 40,
+  hopHeight: 30,
   hopVelocity: 220,
   stopTime: 2,
 };
