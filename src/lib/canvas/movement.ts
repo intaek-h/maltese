@@ -23,6 +23,29 @@ export function registerMovement(type: string, handlers: MovementHandlers) {
   movementRegistry.set(type, handlers);
 }
 
+// Rabbit movement config and setters
+export type RabbitConfig = {
+  hopDistance: number; // px per hop
+  hopHeight: number; // px peak height
+  hopVelocity: number; // px/sec horizontal during hop
+  stopTime: number; // seconds paused after 3 hops
+};
+
+let rabbitConfig: RabbitConfig = {
+  hopDistance: 100,
+  hopHeight: 60,
+  hopVelocity: 220,
+  stopTime: 2,
+};
+
+export function setRabbitConfig(partial: Partial<RabbitConfig>) {
+  rabbitConfig = { ...rabbitConfig, ...partial };
+}
+
+export function getRabbitConfig(): RabbitConfig {
+  return rabbitConfig;
+}
+
 // Default slide movement
 registerMovement("slide", {
   update: (m, canvasWidth, canvasHeight, dt) => {
@@ -83,7 +106,7 @@ registerMovement("hop", {
       m.hop.baseY *= sy;
       m.hop.baseY = Math.min(ch - m.height, Math.max(0, m.hop.baseY));
       const yFromHop =
-        m.hop.baseY - m.hop.amplitude * Math.abs(Math.sin(m.hop.phase));
+    m.hop.baseY - m.hop.amplitude * Math.abs(Math.sin(m.hop.phase));
       m.y = Math.max(0, Math.min(yFromHop, ch - m.height));
     }
   },
@@ -246,6 +269,95 @@ registerMovement("orbit", {
       m.orbit.centerY + m.orbit.radius * Math.sin(m.orbit.angle) - m.height / 2;
     m.x = Math.max(0, Math.min(px, cw - m.width));
     m.y = Math.max(0, Math.min(py, ch - m.height));
+  },
+});
+
+// Rabbit: three hops forward, then pause
+registerMovement("rabbit", {
+  init: (m, _cw, ch) => {
+    const cfg = getRabbitConfig();
+    const baseY = Math.min(ch - m.height, Math.max(0, m.y));
+    const directionX: 1 | -1 = m.velocityX >= 0 ? 1 : -1;
+    m.rabbit = {
+      hopDistance: cfg.hopDistance,
+      hopHeight: cfg.hopHeight,
+      hopVelocity: cfg.hopVelocity,
+      stopTime: cfg.stopTime,
+      hopsRemainingInBurst: 3,
+      hopProgress: 0,
+      hopping: true,
+      directionX,
+      pauseRemaining: 0,
+      baseY,
+    };
+    m.y = baseY;
+    // neutralize base velocities; rabbit movement controls x/y explicitly
+    m.velocityY = 0;
+  },
+  update: (m, cw, ch, dt) => {
+    if (!m.rabbit) return;
+    // keep runtime config in sync so UI changes apply immediately
+    const cfg = getRabbitConfig();
+    m.rabbit.hopDistance = cfg.hopDistance;
+    m.rabbit.hopHeight = cfg.hopHeight;
+    m.rabbit.hopVelocity = cfg.hopVelocity;
+    m.rabbit.stopTime = cfg.stopTime;
+
+    const r = m.rabbit;
+
+    // Pause phase
+    if (!r.hopping) {
+      r.pauseRemaining = Math.max(0, r.pauseRemaining - dt);
+      m.y = Math.max(0, Math.min(r.baseY, ch - m.height));
+      if (r.pauseRemaining === 0) {
+        r.hopping = true;
+        r.hopsRemainingInBurst = 3;
+        r.hopProgress = 0;
+      }
+      return;
+    }
+
+    // Hop phase
+    const hopSpeed = Math.max(1, r.hopVelocity);
+    const hopDistance = Math.max(1, r.hopDistance);
+    const hopDuration = hopDistance / hopSpeed;
+    r.hopProgress += dt / Math.max(0.0001, hopDuration);
+
+    // Horizontal advance
+    const dx = r.directionX * hopSpeed * dt;
+    m.x += dx;
+
+    // Horizontal bounds + direction flip
+    if (m.x < 0) {
+      m.x = 0;
+      r.directionX = 1;
+    } else if (m.x + m.width > cw) {
+      m.x = cw - m.width;
+      r.directionX = -1;
+    }
+
+    // Vertical arc (simple sine arc 0..pi)
+    const arcT = Math.min(1, Math.max(0, r.hopProgress));
+    const yFromHop = r.baseY - r.hopHeight * Math.sin(Math.PI * arcT);
+    m.y = Math.max(0, Math.min(yFromHop, ch - m.height));
+
+    // End of a hop
+    if (r.hopProgress >= 1) {
+      r.hopsRemainingInBurst -= 1;
+      r.hopProgress = 0;
+      // Reset baseY to current ground level
+      r.baseY = Math.min(ch - m.height, Math.max(0, r.baseY));
+      if (r.hopsRemainingInBurst <= 0) {
+        r.hopping = false;
+        r.pauseRemaining = r.stopTime;
+      }
+    }
+  },
+  resize: (m, _sx, sy, _cw, ch) => {
+    if (!m.rabbit) return;
+    m.rabbit.baseY *= sy;
+    m.rabbit.baseY = Math.min(ch - m.height, Math.max(0, m.rabbit.baseY));
+    m.y = Math.max(0, Math.min(m.rabbit.baseY, ch - m.height));
   },
 });
 

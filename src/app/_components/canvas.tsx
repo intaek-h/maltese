@@ -14,6 +14,7 @@ import {
   updateMovement,
 } from "@/lib/canvas/movement";
 import type { Animal, MovingAnimal, Word } from "@/lib/canvas/types";
+import RabbitControls from "./rabbit-controls";
 
 export default function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -290,5 +291,10 @@ export default function Canvas() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="h-full w-full" />;
+  return (
+    <div className="relative h-full w-full">
+      <canvas ref={canvasRef} className="h-full w-full" />
+      <RabbitControls />
+    </div>
+  );
 }
