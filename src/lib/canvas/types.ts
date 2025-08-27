@@ -75,5 +75,7 @@ export type MovingAnimal = {
     directionX: 1 | -1; // horizontal direction
     pauseRemaining: number; // seconds remaining in stop
     baseY: number; // ground level for hop baseline
+    hopStartX: number; // start x of current hop
+    hopEndX: number; // target x of current hop
   };
 };
