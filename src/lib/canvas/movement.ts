@@ -52,9 +52,12 @@ registerMovement("hop", {
   init: (m, _cw, ch) => {
     const amplitude = 30 + Math.random() * 50;
     const phase = Math.random() * Math.PI * 2;
-    const speedPhase = 6 + Math.random() * 4;
+    // Slow down hop vertical oscillation speed
+    const speedPhase = 1 + Math.random() * 2.5;
     const baseY = Math.min(ch - m.height, m.y);
     m.velocityY = 0;
+    // Reduce horizontal drift speed for hop movement
+    m.velocityX *= 0.6;
     m.hop = { baseY, amplitude, phase, speed: speedPhase };
     m.y = Math.max(0, baseY - amplitude * Math.abs(Math.sin(phase)));
   },
@@ -130,8 +133,8 @@ registerMovement("flutter", {
     m.flutter = {
       phase: Math.random() * Math.PI * 2,
       bobAmplitude: 10 + Math.random() * 15,
-      bobSpeed: 8 + Math.random() * 6,
-      driftSpeed: 20 + Math.random() * 30,
+      bobSpeed: 1 + Math.random() * 6,
+      driftSpeed: 10 + Math.random() * 30,
       heading: Math.random() * Math.PI * 2,
     };
     // Reduce base speeds for a gentler feel

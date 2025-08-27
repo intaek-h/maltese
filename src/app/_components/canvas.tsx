@@ -3,7 +3,11 @@
 import { useEffect, useRef } from "react";
 import animals from "@/dummy/animals.json";
 import words from "@/dummy/words.json";
-import { drawScene } from "@/lib/canvas/draw";
+import {
+  computeNotePlacement,
+  defaultNoteStyle,
+  drawScene,
+} from "@/lib/canvas/draw";
 import {
   handleResizeForMovingAnimal,
   initializeMovement,
@@ -104,6 +108,64 @@ export default function Canvas() {
     function update(deltaSeconds: number) {
       for (const moving of movingAnimals) {
         updateMovement(moving, logicalWidth, logicalHeight, deltaSeconds);
+
+        // After movement, bounce if note would hit horizontal edges.
+        const placement = computeNotePlacement(
+          context,
+          canvas,
+          moving,
+          defaultNoteStyle,
+        );
+        const {
+          boxWidth,
+          boxHeight,
+          desiredX,
+          desiredY,
+          margin,
+          logicalCanvasWidth,
+        } = placement;
+        if (boxWidth > 0) {
+          const overflowLeft = desiredX < margin - 0.5;
+          const overflowRight =
+            desiredX > logicalCanvasWidth - boxWidth - margin + 0.5;
+          if (overflowLeft || overflowRight) {
+            // Reverse horizontal direction like a wall bounce
+            moving.velocityX *= -1;
+            // Reposition so the note fits exactly within the horizontal bounds
+            if (overflowLeft) {
+              const targetDesiredX = margin;
+              const newSpriteX =
+                targetDesiredX + boxWidth / 2 - moving.width / 2;
+              moving.x = Math.max(
+                0,
+                Math.min(logicalCanvasWidth - moving.width, newSpriteX),
+              );
+            } else if (overflowRight) {
+              const targetDesiredX = logicalCanvasWidth - margin - boxWidth;
+              const newSpriteX =
+                targetDesiredX + boxWidth / 2 - moving.width / 2;
+              moving.x = Math.max(
+                0,
+                Math.min(logicalCanvasWidth - moving.width, newSpriteX),
+              );
+            }
+          }
+          // Vertical: if the note would go above the top, bounce vertically and reposition
+          if (desiredY < 0) {
+            moving.velocityY *= -1;
+            const targetBoxTop = 0;
+            const newSpriteY =
+              targetBoxTop +
+              defaultNoteStyle.gap +
+              defaultNoteStyle.arrowSize +
+              boxHeight;
+            const logicalCanvasHeight = logicalHeight;
+            moving.y = Math.max(
+              0,
+              Math.min(logicalCanvasHeight - moving.height, newSpriteY),
+            );
+          }
+        }
       }
     }
 

@@ -42,6 +42,66 @@ export const defaultNoteStyle: NoteStyle = {
   dividerWidth: 3,
 };
 
+// Compute the note box placement for a given moving sprite without drawing.
+// This returns desired (unclamped) X/Y for the box when placed above the sprite.
+export function computeNotePlacement(
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  moving: MovingAnimal,
+  style: NoteStyle = defaultNoteStyle,
+) {
+  const input1 = (moving.input1 ?? "").trim();
+  const input2 = (moving.input2 ?? "").trim();
+  const hasAny = input1.length > 0 || input2.length > 0;
+  if (!hasAny) {
+    return {
+      boxWidth: 0,
+      boxHeight: 0,
+      desiredX: moving.x,
+      desiredY: moving.y,
+      margin: 4,
+      logicalCanvasWidth: canvas.width / (ctx.getTransform().a || 1),
+    };
+  }
+
+  ctx.font = style.font;
+  const lines1 = input1 ? wrapText(ctx, input1, style.maxWidth) : [];
+  const lines2 = input2 ? wrapText(ctx, input2, style.maxWidth) : [];
+  const lines = [...lines1, ...lines2];
+
+  let textWidth = 0;
+  for (const line of lines)
+    textWidth = Math.max(textWidth, ctx.measureText(line).width);
+  const boxWidth = Math.ceil(textWidth) + style.paddingX * 2;
+  const hasDivider = lines1.length > 0 && lines2.length > 0;
+  const isSingleBlock = !hasDivider;
+  const visibleLinesCount = lines1.length > 0 ? lines1.length : lines2.length;
+  const boxHeight = isSingleBlock
+    ? visibleLinesCount * style.lineHeight + style.paddingY
+    : lines1.length * style.lineHeight +
+      style.dividerWidth +
+      lines2.length * style.lineHeight +
+      style.paddingY * 2;
+
+  const anchorX = moving.x + moving.width / 2;
+  const anchorY = moving.y;
+  const desiredX = Math.round(anchorX - boxWidth / 2);
+  const desiredY = Math.round(
+    anchorY - style.gap - style.arrowSize - boxHeight,
+  );
+  const t = ctx.getTransform();
+  const logicalCanvasWidth = canvas.width / (t.a || 1);
+  const margin = 4;
+  return {
+    boxWidth,
+    boxHeight,
+    desiredX,
+    desiredY,
+    margin,
+    logicalCanvasWidth,
+  };
+}
+
 function createRoundedRectPath(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -127,16 +187,14 @@ function drawNote(
   const anchorX = moving.x + moving.width / 2;
   const anchorY = moving.y;
 
-  // Prefer above; flip if out of bounds
+  // Always prefer above; clamp into boundary instead of flipping
   const preferAbove = true;
-  const neededHeight = boxHeight + style.arrowSize + style.gap;
-  const fitsAbove = anchorY - neededHeight >= 0;
-  const placeAbove = preferAbove && fitsAbove;
+  const placeAbove = preferAbove;
 
   let boxX = Math.round(anchorX - boxWidth / 2);
-  const boxY = placeAbove
-    ? Math.round(anchorY - style.gap - style.arrowSize - boxHeight)
-    : Math.round(moving.y + moving.height + style.gap + style.arrowSize);
+  let boxY = Math.round(anchorY - style.gap - style.arrowSize - boxHeight);
+  // Clamp vertically into canvas top (no flip)
+  boxY = Math.max(0, boxY);
 
   // Clamp horizontally within canvas (logical size under current transform)
   const t = ctx.getTransform();
