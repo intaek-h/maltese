@@ -34,5 +34,14 @@
     "created_at": 1756107293778,
     "updated_at": 1756107293778,
     "deleted_at": null
+  },
+  {
+    "id": 5,
+    "name": "rabbit",
+    "image": "https://placehold.co/500x300",
+    "movement_type": "rabbit",
+    "created_at": 1756107293778,
+    "updated_at": 1756107293778,
+    "deleted_at": null
   }
 ]

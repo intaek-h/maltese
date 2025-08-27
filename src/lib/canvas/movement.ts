@@ -23,6 +23,29 @@ export function registerMovement(type: string, handlers: MovementHandlers) {
   movementRegistry.set(type, handlers);
 }
 
+// Rabbit movement config and setters
+export type RabbitConfig = {
+  hopDistance: number; // px per hop
+  hopHeight: number; // px peak height
+  hopVelocity: number; // px/sec horizontal during hop
+  stopTime: number; // seconds paused after 3 hops
+};
+
+let rabbitConfig: RabbitConfig = {
+  hopDistance: 40,
+  hopHeight: 30,
+  hopVelocity: 220,
+  stopTime: 2,
+};
+
+export function setRabbitConfig(partial: Partial<RabbitConfig>) {
+  rabbitConfig = { ...rabbitConfig, ...partial };
+}
+
+export function getRabbitConfig(): RabbitConfig {
+  return rabbitConfig;
+}
+
 // Default slide movement
 registerMovement("slide", {
   update: (m, canvasWidth, canvasHeight, dt) => {
@@ -83,7 +106,7 @@ registerMovement("hop", {
       m.hop.baseY *= sy;
       m.hop.baseY = Math.min(ch - m.height, Math.max(0, m.hop.baseY));
       const yFromHop =
-        m.hop.baseY - m.hop.amplitude * Math.abs(Math.sin(m.hop.phase));
+    m.hop.baseY - m.hop.amplitude * Math.abs(Math.sin(m.hop.phase));
       m.y = Math.max(0, Math.min(yFromHop, ch - m.height));
     }
   },
@@ -246,6 +269,120 @@ registerMovement("orbit", {
       m.orbit.centerY + m.orbit.radius * Math.sin(m.orbit.angle) - m.height / 2;
     m.x = Math.max(0, Math.min(px, cw - m.width));
     m.y = Math.max(0, Math.min(py, ch - m.height));
+  },
+});
+
+// Rabbit: three hops forward, then pause
+registerMovement("rabbit", {
+  init: (m, cw, ch) => {
+    const cfg = getRabbitConfig();
+    const baseY = Math.min(ch - m.height, Math.max(0, m.y));
+    const directionX: 1 | -1 = m.velocityX >= 0 ? 1 : -1;
+    const startX = Math.max(0, Math.min(m.x, cw - m.width));
+    const intendedEndX = startX + directionX * cfg.hopDistance;
+    let endX = intendedEndX;
+    let dir = directionX;
+    if (intendedEndX < 0 || intendedEndX > cw - m.width) {
+      // flip direction if the next hop would exceed bounds
+      dir = (directionX === 1 ? -1 : 1);
+      endX = startX + dir * cfg.hopDistance;
+      endX = Math.max(0, Math.min(endX, cw - m.width));
+    }
+    m.rabbit = {
+      hopDistance: cfg.hopDistance,
+      hopHeight: cfg.hopHeight,
+      hopVelocity: cfg.hopVelocity,
+      stopTime: cfg.stopTime,
+      hopsRemainingInBurst: 3,
+      hopProgress: 0,
+      hopping: true,
+      directionX: dir,
+      pauseRemaining: 0,
+      baseY,
+      hopStartX: startX,
+      hopEndX: endX,
+    };
+    m.y = baseY;
+    m.velocityX = 0;
+    m.velocityY = 0;
+  },
+  update: (m, cw, ch, dt) => {
+    if (!m.rabbit) return;
+    // keep runtime config in sync so code changes apply
+    const cfg = getRabbitConfig();
+    const r = m.rabbit;
+    r.hopDistance = cfg.hopDistance;
+    r.hopHeight = cfg.hopHeight;
+    r.hopVelocity = cfg.hopVelocity;
+    r.stopTime = cfg.stopTime;
+
+    // Pause phase
+    if (!r.hopping) {
+      r.pauseRemaining = Math.max(0, r.pauseRemaining - dt);
+      m.y = Math.max(0, Math.min(r.baseY, ch - m.height));
+      if (r.pauseRemaining === 0) {
+        r.hopping = true;
+        r.hopsRemainingInBurst = 3;
+        r.hopProgress = 0;
+        // prepare next hop window based on current position and direction
+        r.hopStartX = Math.max(0, Math.min(m.x, cw - m.width));
+        let intendedEndX = r.hopStartX + r.directionX * r.hopDistance;
+        if (intendedEndX < 0 || intendedEndX > cw - m.width) {
+          r.directionX = (r.directionX === 1 ? -1 : 1);
+          intendedEndX = r.hopStartX + r.directionX * r.hopDistance;
+        }
+        r.hopEndX = Math.max(0, Math.min(intendedEndX, cw - m.width));
+      }
+      return;
+    }
+
+    // Hop phase: advance progress based on horizontal speed and required distance
+    const totalDistance = Math.max(1, Math.abs(r.hopEndX - r.hopStartX));
+    const hopDuration = totalDistance / Math.max(1, r.hopVelocity);
+    r.hopProgress += dt / hopDuration;
+
+    const t = Math.min(1, Math.max(0, r.hopProgress));
+    // Smoothstep for horizontal (ease-in-out)
+    const tEase = t * t * (3 - 2 * t);
+    m.x = r.hopStartX + (r.hopEndX - r.hopStartX) * tEase;
+
+    // Vertical arc (0..pi sine)
+    const yFromHop = r.baseY - r.hopHeight * Math.sin(Math.PI * t);
+    m.y = Math.max(0, Math.min(yFromHop, ch - m.height));
+
+    // End of a hop
+    if (r.hopProgress >= 1) {
+      r.hopsRemainingInBurst -= 1;
+      r.hopProgress = 0;
+      // start next hop or pause
+      if (r.hopsRemainingInBurst <= 0) {
+        r.hopping = false;
+        r.pauseRemaining = r.stopTime;
+      } else {
+        r.hopStartX = Math.max(0, Math.min(r.hopEndX, cw - m.width));
+        // compute next end, flipping if needed
+        let intendedEndX = r.hopStartX + r.directionX * r.hopDistance;
+        if (intendedEndX < 0 || intendedEndX > cw - m.width) {
+          r.directionX = (r.directionX === 1 ? -1 : 1);
+          intendedEndX = r.hopStartX + r.directionX * r.hopDistance;
+        }
+        r.hopEndX = Math.max(0, Math.min(intendedEndX, cw - m.width));
+      }
+    }
+  },
+  resize: (m, _sx, sy, cw, ch) => {
+    if (!m.rabbit) return;
+    m.rabbit.baseY *= sy;
+    m.rabbit.baseY = Math.min(ch - m.height, Math.max(0, m.rabbit.baseY));
+    // Re-scale start/end X proportionally to keep trajectory reasonable
+    m.rabbit.hopStartX = Math.max(0, Math.min(m.x, cw - m.width));
+    let intendedEndX = m.rabbit.hopStartX + m.rabbit.directionX * m.rabbit.hopDistance;
+    if (intendedEndX < 0 || intendedEndX > cw - m.width) {
+      m.rabbit.directionX = (m.rabbit.directionX === 1 ? -1 : 1);
+      intendedEndX = m.rabbit.hopStartX + m.rabbit.directionX * m.rabbit.hopDistance;
+    }
+    m.rabbit.hopEndX = Math.max(0, Math.min(intendedEndX, cw - m.width));
+    m.y = Math.max(0, Math.min(m.rabbit.baseY, ch - m.height));
   },
 });
 

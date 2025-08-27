@@ -64,4 +64,18 @@ export type MovingAnimal = {
     centerVX: number;
     centerVY: number;
   };
+  rabbit?: {
+    hopDistance: number; // px per hop forward
+    hopHeight: number; // peak height of hop arc
+    hopVelocity: number; // horizontal velocity during hop (px/sec)
+    stopTime: number; // seconds to stop after 3 hops
+    hopsRemainingInBurst: number; // countdown of hops in current burst
+    hopProgress: number; // 0..1 progress through current hop
+    hopping: boolean; // whether currently mid-hop vs stopped
+    directionX: 1 | -1; // horizontal direction
+    pauseRemaining: number; // seconds remaining in stop
+    baseY: number; // ground level for hop baseline
+    hopStartX: number; // start x of current hop
+    hopEndX: number; // target x of current hop
+  };
 };
