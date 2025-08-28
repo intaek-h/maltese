@@ -35,6 +35,8 @@ export type MovingAnimal = {
   imageElement: HTMLImageElement;
   isImageLoaded: boolean;
   highlightRemainingMs?: number;
+  // Randomized startup delay to desynchronize same-type movements
+  startDelayRemainingSec?: number;
   hop?: {
     baseY: number;
     amplitude: number;
@@ -63,6 +65,19 @@ export type MovingAnimal = {
     direction: 1 | -1;
     centerVX: number;
     centerVY: number;
+  };
+  deer?: {
+    hopDistance: number; // px per hop forward
+    hopHeight: number; // peak height of hop arc
+    hopVelocity: number; // horizontal velocity during hop (px/sec)
+    stopTime: number; // seconds to stop after each hop
+    hopProgress: number; // 0..1 progress through current hop
+    hopping: boolean; // whether currently mid-hop vs stopped
+    directionX: 1 | -1; // horizontal direction
+    pauseRemaining: number; // seconds remaining in stop
+    baseY: number; // ground level for hop baseline
+    hopStartX: number; // start x of current hop
+    hopEndX: number; // target x of current hop
   };
   rabbit?: {
     hopDistance: number; // px per hop forward

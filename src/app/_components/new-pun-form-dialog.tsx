@@ -44,7 +44,7 @@ export default function NewPunFormDialog({
           showCloseButton={false}
         >
           <div className="flex h-full w-full max-w-[calc(100vw-2rem)] flex-col">
-            <DialogHeader className="animate-jump items-center py-16">
+            <DialogHeader className="items-center py-16">
               <DialogTitle className="text-secondary text-3xl font-bold">
                 두 줄로 말장난을 만들어요
               </DialogTitle>

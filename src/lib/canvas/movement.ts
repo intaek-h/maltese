@@ -106,7 +106,7 @@ registerMovement("hop", {
       m.hop.baseY *= sy;
       m.hop.baseY = Math.min(ch - m.height, Math.max(0, m.hop.baseY));
       const yFromHop =
-    m.hop.baseY - m.hop.amplitude * Math.abs(Math.sin(m.hop.phase));
+        m.hop.baseY - m.hop.amplitude * Math.abs(Math.sin(m.hop.phase));
       m.y = Math.max(0, Math.min(yFromHop, ch - m.height));
     }
   },
@@ -284,7 +284,7 @@ registerMovement("rabbit", {
     let dir = directionX;
     if (intendedEndX < 0 || intendedEndX > cw - m.width) {
       // flip direction if the next hop would exceed bounds
-      dir = (directionX === 1 ? -1 : 1);
+      dir = directionX === 1 ? -1 : 1;
       endX = startX + dir * cfg.hopDistance;
       endX = Math.max(0, Math.min(endX, cw - m.width));
     }
@@ -328,7 +328,7 @@ registerMovement("rabbit", {
         r.hopStartX = Math.max(0, Math.min(m.x, cw - m.width));
         let intendedEndX = r.hopStartX + r.directionX * r.hopDistance;
         if (intendedEndX < 0 || intendedEndX > cw - m.width) {
-          r.directionX = (r.directionX === 1 ? -1 : 1);
+          r.directionX = r.directionX === 1 ? -1 : 1;
           intendedEndX = r.hopStartX + r.directionX * r.hopDistance;
         }
         r.hopEndX = Math.max(0, Math.min(intendedEndX, cw - m.width));
@@ -363,7 +363,7 @@ registerMovement("rabbit", {
         // compute next end, flipping if needed
         let intendedEndX = r.hopStartX + r.directionX * r.hopDistance;
         if (intendedEndX < 0 || intendedEndX > cw - m.width) {
-          r.directionX = (r.directionX === 1 ? -1 : 1);
+          r.directionX = r.directionX === 1 ? -1 : 1;
           intendedEndX = r.hopStartX + r.directionX * r.hopDistance;
         }
         r.hopEndX = Math.max(0, Math.min(intendedEndX, cw - m.width));
@@ -376,13 +376,114 @@ registerMovement("rabbit", {
     m.rabbit.baseY = Math.min(ch - m.height, Math.max(0, m.rabbit.baseY));
     // Re-scale start/end X proportionally to keep trajectory reasonable
     m.rabbit.hopStartX = Math.max(0, Math.min(m.x, cw - m.width));
-    let intendedEndX = m.rabbit.hopStartX + m.rabbit.directionX * m.rabbit.hopDistance;
+    let intendedEndX =
+      m.rabbit.hopStartX + m.rabbit.directionX * m.rabbit.hopDistance;
     if (intendedEndX < 0 || intendedEndX > cw - m.width) {
-      m.rabbit.directionX = (m.rabbit.directionX === 1 ? -1 : 1);
-      intendedEndX = m.rabbit.hopStartX + m.rabbit.directionX * m.rabbit.hopDistance;
+      m.rabbit.directionX = m.rabbit.directionX === 1 ? -1 : 1;
+      intendedEndX =
+        m.rabbit.hopStartX + m.rabbit.directionX * m.rabbit.hopDistance;
     }
     m.rabbit.hopEndX = Math.max(0, Math.min(intendedEndX, cw - m.width));
     m.y = Math.max(0, Math.min(m.rabbit.baseY, ch - m.height));
+  },
+});
+
+// Deer: single hop forward, then pause 1s, repeat; flip at edges
+registerMovement("deer", {
+  init: (m, cw, ch) => {
+    const HOP_DISTANCE = 60;
+    const HOP_HEIGHT = 50;
+    const HOP_VELOCITY = 220; // px/sec
+    const STOP_TIME = 1; // seconds
+
+    const baseY = Math.min(ch - m.height, Math.max(0, m.y));
+    const directionX: 1 | -1 = m.velocityX >= 0 ? 1 : -1;
+    const startX = Math.max(0, Math.min(m.x, cw - m.width));
+    const intendedEndX = startX + directionX * HOP_DISTANCE;
+    let endX = intendedEndX;
+    let dir = directionX;
+    if (intendedEndX < 0 || intendedEndX > cw - m.width) {
+      dir = directionX === 1 ? -1 : 1;
+      endX = startX + dir * HOP_DISTANCE;
+      endX = Math.max(0, Math.min(endX, cw - m.width));
+    }
+    m.deer = {
+      hopDistance: HOP_DISTANCE,
+      hopHeight: HOP_HEIGHT,
+      hopVelocity: HOP_VELOCITY,
+      stopTime: STOP_TIME,
+      hopProgress: 0,
+      hopping: true,
+      directionX: dir,
+      pauseRemaining: 0,
+      baseY,
+      hopStartX: startX,
+      hopEndX: endX,
+    };
+    m.y = baseY;
+    m.velocityX = 0;
+    m.velocityY = 0;
+  },
+  update: (m, cw, ch, dt) => {
+    if (!m.deer) return;
+    const r = m.deer;
+
+    // Pause phase
+    if (!r.hopping) {
+      r.pauseRemaining = Math.max(0, r.pauseRemaining - dt);
+      m.y = Math.max(0, Math.min(r.baseY, ch - m.height));
+      if (r.pauseRemaining === 0) {
+        r.hopping = true;
+        r.hopProgress = 0;
+        // prepare next hop based on current position and direction
+        r.hopStartX = Math.max(0, Math.min(m.x, cw - m.width));
+        let intendedEndX = r.hopStartX + r.directionX * r.hopDistance;
+        if (intendedEndX < 0 || intendedEndX > cw - m.width) {
+          r.directionX = r.directionX === 1 ? -1 : 1;
+          intendedEndX = r.hopStartX + r.directionX * r.hopDistance;
+        }
+        r.hopEndX = Math.max(0, Math.min(intendedEndX, cw - m.width));
+      }
+      return;
+    }
+
+    // Hop phase
+    const totalDistance = Math.max(1, Math.abs(r.hopEndX - r.hopStartX));
+    const hopDuration = totalDistance / Math.max(1, r.hopVelocity);
+    r.hopProgress += dt / hopDuration;
+
+    const t = Math.min(1, Math.max(0, r.hopProgress));
+    const tEase = t * t * (3 - 2 * t);
+    m.x = r.hopStartX + (r.hopEndX - r.hopStartX) * tEase;
+
+    const yFromHop = r.baseY - r.hopHeight * Math.sin(Math.PI * t);
+    m.y = Math.max(0, Math.min(yFromHop, ch - m.height));
+
+    if (r.hopProgress >= 1) {
+      // After one hop, pause
+      r.hopping = false;
+      r.pauseRemaining = r.stopTime;
+      r.hopProgress = 0;
+      // If we ended up at an edge, flip for next hop
+      if (m.x <= 0 || m.x + m.width >= cw) {
+        r.directionX = r.directionX === 1 ? -1 : 1;
+      }
+    }
+  },
+  resize: (m, _sx, sy, cw, ch) => {
+    if (!m.deer) return;
+    m.deer.baseY *= sy;
+    m.deer.baseY = Math.min(ch - m.height, Math.max(0, m.deer.baseY));
+    // Re-scale start/end X proportionally to keep trajectory reasonable
+    m.deer.hopStartX = Math.max(0, Math.min(m.x, cw - m.width));
+    let intendedEndX =
+      m.deer.hopStartX + m.deer.directionX * m.deer.hopDistance;
+    if (intendedEndX < 0 || intendedEndX > cw - m.width) {
+      m.deer.directionX = m.deer.directionX === 1 ? -1 : 1;
+      intendedEndX = m.deer.hopStartX + m.deer.directionX * m.deer.hopDistance;
+    }
+    m.deer.hopEndX = Math.max(0, Math.min(intendedEndX, cw - m.width));
+    m.y = Math.max(0, Math.min(m.deer.baseY, ch - m.height));
   },
 });
 
