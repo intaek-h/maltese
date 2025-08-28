@@ -1,11 +1,13 @@
 "use client";
 
+import { useQuery } from "convex/react";
 import type {
   EmblaCarouselType,
   EmblaEventType,
   EmblaOptionsType,
 } from "embla-carousel";
 import useEmblaCarousel from "embla-carousel-react";
+import Image from "next/image";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
@@ -17,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import LegoButton from "@/components/ui/lego-button";
+import { api } from "../../../convex/_generated/api";
 
 type Animal = { key: string; name: string; src: string };
 
@@ -85,6 +88,8 @@ export default function NewPunAnimalDialog({
   openForm: () => void;
   children: React.ReactNode;
 }) {
+  const animals = useQuery(api.animals.getAllAnimals);
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -110,7 +115,7 @@ export default function NewPunAnimalDialog({
 
           <div className="relative h-[50vh] overflow-hidden">
             <div className="flex h-full w-full items-center justify-center">
-              <AnimalCarousel animals={ANIMALS} />
+              <AnimalCarousel animals={animals || []} />
             </div>
           </div>
 
@@ -128,7 +133,15 @@ export default function NewPunAnimalDialog({
   );
 }
 
-function AnimalCarousel({ animals }: { animals: Animal[] }) {
+function AnimalCarousel({
+  animals,
+}: {
+  animals: {
+    movementType: "rabbit" | "deer";
+    name: string;
+    imageUrl: string;
+  }[];
+}) {
   const options = useMemo<EmblaOptionsType>(
     () => ({
       align: "center",
@@ -214,7 +227,7 @@ function AnimalCarousel({ animals }: { animals: Animal[] }) {
           {animals.map((animal, index) => {
             return (
               <div
-                key={animal.key}
+                key={animal.imageUrl}
                 className="h-full flex-[0_0_75%] pl-4 sm:flex-[0_0_60%] md:flex-[0_0_50%]"
               >
                 <div
@@ -225,10 +238,11 @@ function AnimalCarousel({ animals }: { animals: Animal[] }) {
                     if (el) tweenNodes.current[index] = el;
                   }}
                 >
-                  {/** biome-ignore lint/performance/noImgElement: temp */}
-                  <img
-                    src={animal.src}
+                  <Image
+                    src={animal.imageUrl}
                     alt={animal.name}
+                    width={500}
+                    height={500}
                     className={"h-full w-auto scale-100 transition-transform"}
                   />
                 </div>

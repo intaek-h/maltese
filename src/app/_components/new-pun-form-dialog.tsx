@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation } from "convex/react";
 import { ArrowLeftIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import LegoButton from "@/components/ui/lego-button";
+import { api } from "../../../convex/_generated/api";
 import NewPunForm from "./new-pun-form";
 
 export default function NewPunFormDialog({
@@ -33,6 +35,8 @@ export default function NewPunFormDialog({
   setIsOpen: (isOpen: boolean) => void;
   children?: React.ReactNode;
 }) {
+  const createPun = useMutation(api.puns.createPun);
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -91,7 +95,16 @@ export default function NewPunFormDialog({
                   <ArrowLeftIcon className="mr-2" />
                   뒤로
                 </LegoButton>
-                <LegoButton>저장하기</LegoButton>
+                <LegoButton
+                  onClick={() => {
+                    createPun({
+                      firstRow: "안녕하세요",
+                      secondRow: "또만나요",
+                    });
+                  }}
+                >
+                  저장하기
+                </LegoButton>
               </div>
             </div>
           </div>
