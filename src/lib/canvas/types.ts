@@ -35,6 +35,8 @@ export type MovingAnimal = {
   imageElement: HTMLImageElement;
   isImageLoaded: boolean;
   highlightRemainingMs?: number;
+  // Randomized startup delay to desynchronize same-type movements
+  startDelayRemainingSec?: number;
   hop?: {
     baseY: number;
     amplitude: number;

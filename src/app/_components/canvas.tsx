@@ -127,6 +127,8 @@ export default function Canvas() {
         height,
         imageElement,
         isImageLoaded: false,
+        // Stagger start by 0-0.8s so same-type movements don't sync
+        startDelayRemainingSec: Math.random() * 0.8,
       };
 
       // Initialize movement via registry (configures per-type state)
@@ -171,6 +173,15 @@ export default function Canvas() {
 
     function update(deltaSeconds: number) {
       for (const moving of movingAnimals) {
+        // Respect randomized start delay to desynchronize animations
+        if ((moving.startDelayRemainingSec ?? 0) > 0) {
+          moving.startDelayRemainingSec = Math.max(
+            0,
+            (moving.startDelayRemainingSec ?? 0) - deltaSeconds,
+          );
+          continue;
+        }
+
         updateMovement(moving, logicalWidth, logicalHeight, deltaSeconds);
 
         // After movement, bounce if note would hit horizontal edges.
