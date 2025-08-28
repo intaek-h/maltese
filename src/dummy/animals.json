@@ -2,7 +2,7 @@
   {
     "id": 1,
     "name": "dog",
-    "image": "https://placehold.co/600x400",
+    "image": "/maltese/maltese_1",
     "movement_type": "hop",
     "created_at": 1756107293778,
     "updated_at": 1756107293778,
@@ -11,7 +11,7 @@
   {
     "id": 2,
     "name": "cat",
-    "image": "https://placehold.co/300x400",
+    "image": "/maltese/maltese_2",
     "movement_type": "zigzag",
     "created_at": 1756107293778,
     "updated_at": 1756107293778,
@@ -20,7 +20,7 @@
   {
     "id": 3,
     "name": "bird",
-    "image": "https://placehold.co/100x400",
+    "image": "/maltese/maltese_3",
     "movement_type": "orbit",
     "created_at": 1756107293778,
     "updated_at": 1756107293778,
@@ -29,7 +29,7 @@
   {
     "id": 4,
     "name": "fish",
-    "image": "https://placehold.co/600x400",
+    "image": "/maltese/maltese_4",
     "movement_type": "flutter",
     "created_at": 1756107293778,
     "updated_at": 1756107293778,
@@ -38,8 +38,17 @@
   {
     "id": 5,
     "name": "rabbit",
-    "image": "https://placehold.co/500x300",
+    "image": "/maltese/maltese_5",
     "movement_type": "rabbit",
+    "created_at": 1756107293778,
+    "updated_at": 1756107293778,
+    "deleted_at": null
+  },
+  {
+    "id": 6,
+    "name": "deer",
+    "image": "/maltese/maltese_12",
+    "movement_type": "deer",
     "created_at": 1756107293778,
     "updated_at": 1756107293778,
     "deleted_at": null

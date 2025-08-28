@@ -15,6 +15,21 @@ import {
 } from "@/lib/canvas/movement";
 import type { Animal, MovingAnimal, Word } from "@/lib/canvas/types";
 
+function fitWithinBounds(
+  naturalWidth: number,
+  naturalHeight: number,
+  maxWidth: number,
+  maxHeight: number,
+) {
+  if (naturalWidth <= 0 || naturalHeight <= 0) {
+    return { width: maxWidth, height: maxHeight };
+  }
+  const scale = Math.min(maxWidth / naturalWidth, maxHeight / naturalHeight);
+  const width = Math.max(1, Math.round(naturalWidth * scale));
+  const height = Math.max(1, Math.round(naturalHeight * scale));
+  return { width, height };
+}
+
 export default function Canvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -48,7 +63,7 @@ export default function Canvas() {
 
     sizeCanvasToWindow();
 
-    // Build moving animals: one sprite per word, using the associated animal image
+    // Build moving animals: one sprite per word, using a real image asset
     const animalById = new Map<number, Animal>();
     for (const animal of animals as Animal[]) animalById.set(animal.id, animal);
 
@@ -60,7 +75,33 @@ export default function Canvas() {
 
       const imageElement = new Image();
       imageElement.crossOrigin = "anonymous";
-      imageElement.src = animal.image;
+      // animal.image is a public path like "/maltese/maltese_1" (without extension)
+      // Try .png first, then fallback to .svg if .png fails
+      const basePath = animal.image;
+      const ensureLeadingSlash = (p: string) =>
+        p.startsWith("/") ? p : `/${p}`;
+      const pngPath = ensureLeadingSlash(
+        basePath.endsWith(".png") || basePath.endsWith(".svg")
+          ? basePath
+          : `${basePath}.png`,
+      );
+      imageElement.src = pngPath;
+      imageElement.onerror = () => {
+        // If png fails and original didn't specify .svg, try svg
+        const svgCandidate = ensureLeadingSlash(
+          basePath.endsWith(".svg")
+            ? basePath
+            : `${basePath.replace(/\.png$/, "")}.svg`,
+        );
+        if (imageElement.src !== svgCandidate) {
+          imageElement.onerror = () => {
+            moving.isImageLoaded = false;
+          };
+          imageElement.src = svgCandidate;
+        } else {
+          moving.isImageLoaded = false;
+        }
+      };
 
       const width = 140;
       const height = 100;
@@ -97,6 +138,29 @@ export default function Canvas() {
     for (const moving of movingAnimals) {
       moving.imageElement.onload = () => {
         moving.isImageLoaded = true;
+        // Preserve aspect ratio within desired bounds
+        const maxW = 140;
+        const maxH = 100;
+        const { naturalWidth, naturalHeight } = moving.imageElement;
+        const { width: fittedW, height: fittedH } = fitWithinBounds(
+          naturalWidth,
+          naturalHeight,
+          maxW,
+          maxH,
+        );
+        moving.width = fittedW;
+        moving.height = fittedH;
+        // Clamp position so the resized sprite stays on-canvas
+        const logicalCanvasWidth = logicalWidth;
+        const logicalCanvasHeight = logicalHeight;
+        moving.x = Math.max(
+          0,
+          Math.min(logicalCanvasWidth - moving.width, moving.x),
+        );
+        moving.y = Math.max(
+          0,
+          Math.min(logicalCanvasHeight - moving.height, moving.y),
+        );
       };
       moving.imageElement.onerror = () => {
         moving.isImageLoaded = false;
