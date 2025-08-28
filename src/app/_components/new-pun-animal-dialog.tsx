@@ -8,14 +8,6 @@ import type {
 import useEmblaCarousel from "embla-carousel-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import bulldog from "@/animals/bulldog-1.svg";
-import clown from "@/animals/clown-1.svg";
-import crocodile from "@/animals/crocodile-1.svg";
-import frog from "@/animals/frog-1.svg";
-import lion from "@/animals/lion-1.svg";
-import ostrich from "@/animals/ostrich-1.svg";
-import rabbit from "@/animals/rabbit-1.svg";
-import husky from "@/animals/siberian-husky-1.svg";
 import {
   Dialog,
   DialogContent,
@@ -39,14 +31,46 @@ function resolveSvgSrc(input: unknown): string {
 }
 
 const ANIMALS: Animal[] = [
-  { key: "bulldog", name: "Bulldog", src: resolveSvgSrc(bulldog) },
-  { key: "clown", name: "Clown", src: resolveSvgSrc(clown) },
-  { key: "crocodile", name: "Crocodile", src: resolveSvgSrc(crocodile) },
-  { key: "frog", name: "Frog", src: resolveSvgSrc(frog) },
-  { key: "lion", name: "Lion", src: resolveSvgSrc(lion) },
-  { key: "ostrich", name: "Ostrich", src: resolveSvgSrc(ostrich) },
-  { key: "rabbit", name: "Rabbit", src: resolveSvgSrc(rabbit) },
-  { key: "husky", name: "Siberian Husky", src: resolveSvgSrc(husky) },
+  {
+    key: "maltese_1",
+    name: "잘 익은 말티즈",
+    src: resolveSvgSrc("/maltese/maltese_1.png"),
+  },
+  {
+    key: "maltese_2",
+    name: "말티즈 2",
+    src: resolveSvgSrc("/maltese/maltese_2.png"),
+  },
+  {
+    key: "maltese_3",
+    name: "말티즈 3",
+    src: resolveSvgSrc("/maltese/maltese_3.png"),
+  },
+  {
+    key: "maltese_4",
+    name: "말티즈 4",
+    src: resolveSvgSrc("/maltese/maltese_4.png"),
+  },
+  {
+    key: "maltese_5",
+    name: "말티즈 5",
+    src: resolveSvgSrc("/maltese/maltese_5.png"),
+  },
+  {
+    key: "maltese_6",
+    name: "말티즈 6",
+    src: resolveSvgSrc("/maltese/maltese_6.png"),
+  },
+  {
+    key: "maltese_7",
+    name: "말티즈 7",
+    src: resolveSvgSrc("/maltese/maltese_7.png"),
+  },
+  {
+    key: "maltese_8",
+    name: "말티즈 8",
+    src: resolveSvgSrc("/maltese/maltese_8.png"),
+  },
 ];
 const TWEEN_FACTOR_BASE = 0.52;
 
