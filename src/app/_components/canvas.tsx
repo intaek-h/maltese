@@ -68,7 +68,7 @@ export default function Canvas() {
     for (const animal of animals as Animal[]) animalById.set(animal.id, animal);
 
     const movingAnimals: MovingAnimal[] = [];
-    for (const word of words as Word[]) {
+    for (const word of words.slice(0, 3) as Word[]) {
       const animal = animalById.get(word.animal_id);
       if (!animal) continue;
       const pun = `${word.input_1} ${word.input_2}`.trim() || `${animal.name}`;
