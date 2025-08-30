@@ -105,7 +105,7 @@ export default function NewPunFormDialog({
                       secondRow: row2,
                       animalId:
                         "j974cr4awvssnwprf2wnem9q8h7pgp6p" as Id<"animals">,
-                    });
+                    }).then(() => alert("success"));
                   }}
                 >
                   저장하기

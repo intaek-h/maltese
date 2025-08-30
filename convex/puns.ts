@@ -1,4 +1,5 @@
 import { ConvexError, v } from "convex/values";
+import { v4 as uuidv4 } from "uuid";
 import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 
@@ -26,25 +27,20 @@ export const createPun = mutation({
       throw new ConvexError("존재하지 않는 동물입니다.");
     }
 
-    console.log("args: ", args);
-    console.log("animal: ", animal);
-
-    // const newPunId = await ctx.db.insert("puns", {
-    //   publicKey: uuidv4(),
-    //   firstRow: hasFirst ? firstRow : undefined,
-    //   secondRow: hasSecond ? secondRow : undefined,
-    //   animalId: args.animalId,
-    //   status: "visible",
-    //   likeCount: 0,
-    //   reportCount: 0,
-    //   contentHash,
-    //   authorKey: args.authorKey,
-    //   ipHash,
-    //   userAgent,
-    //   updatedAt: Date.now(),
-    // });
-
-    // return newPunId;
+    await ctx.db.insert("puns", {
+      publicKey: uuidv4(),
+      firstRow: args.firstRow || undefined,
+      secondRow: args.secondRow || undefined,
+      animalId: args.animalId,
+      status: "queued",
+      likeCount: 0,
+      reportCount: 0,
+      contentHash: args.contentHash,
+      authorKey: args.authorKey,
+      ipHash: args.ipHash,
+      userAgent: args.userAgent,
+      updatedAt: 0,
+    });
   },
 });
 
