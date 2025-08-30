@@ -16,6 +16,7 @@ export const getAllAnimals = query({
     }
 
     return animals.map((animal, i) => ({
+      id: animal._id,
       movementType: animal.movementType,
       name: animal.name,
       imageUrl: urls[i],

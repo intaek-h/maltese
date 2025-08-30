@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useAtom } from "jotai";
+import { useEffect, useRef } from "react";
+import { firstRow, secondRow } from "@/store/pun";
 
 export default function NewPunForm() {
   const firstInputRef = useRef<HTMLInputElement>(null);
 
-  const [firstInputValue, setFirstInputValue] = useState("");
-  const [secondInputValue, setSecondInputValue] = useState("");
+  const [firstInputValue, setFirstInputValue] = useAtom(firstRow);
+  const [secondInputValue, setSecondInputValue] = useAtom(secondRow);
 
   useEffect(() => {
     setTimeout(() => {

@@ -1,24 +1,15 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { useState } from "react";
 import NewPunAnimalDialog from "@/app/_components/new-pun-animal-dialog";
 import LegoButton from "@/components/ui/lego-button";
-import { api } from "../../../convex/_generated/api";
 import NewPunFormDialog from "./new-pun-form-dialog";
 
 export default function NewPunContainer() {
-  useQuery(api.puns.getAllPuns);
-  useQuery(api.animals.getAllAnimals);
-
-  // const updatePun = useMutation(api.puns.updatePun);
-
   const [openedDialog, setOpenedDialog] = useState<"" | "animal" | "form">("");
 
   return (
     <div>
-      {/* <LegoButton onClick={() => updatePun()}>변경</LegoButton> */}
-
       <NewPunAnimalDialog
         isOpen={openedDialog === "animal"}
         setIsOpen={(isOpen) => {
