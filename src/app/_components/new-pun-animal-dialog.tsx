@@ -137,7 +137,7 @@ function AnimalCarousel({
   animals,
 }: {
   animals: {
-    movementType: "rabbit" | "deer";
+    movementType: string;
     name: string;
     imageUrl: string;
   }[];

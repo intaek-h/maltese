@@ -40,7 +40,7 @@ export default defineSchema({
   }),
 
   reports: defineTable({
-    punId: v.id("pun"),
+    punId: v.id("puns"),
     reporterKey: v.string(),
     ipHash: v.optional(v.string()),
   }),
