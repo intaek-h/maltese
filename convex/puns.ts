@@ -27,6 +27,15 @@ export const createPun = mutation({
       throw new ConvexError("존재하지 않는 동물입니다.");
     }
 
+    const duplicatePuns = await ctx.db
+      .query("puns")
+      .withIndex("by_contentHash", (h) => h.eq("contentHash", args.contentHash))
+      .collect();
+
+    if (duplicatePuns.length) {
+      throw new ConvexError("중복된 말장난입니다.");
+    }
+
     await ctx.db.insert("puns", {
       publicKey: uuidv4(),
       firstRow: args.firstRow || undefined,
