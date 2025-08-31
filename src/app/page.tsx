@@ -23,7 +23,7 @@ export default async function Home() {
       <Canvas puns={paginatedPuns} animals={animalImages} />
 
       <div className="absolute sm:bottom-24 bottom-12 left-1/2 -translate-x-1/2">
-        <NewPunContainer puns={paginatedPuns} />
+        <NewPunContainer puns={paginatedPuns} animals={animalImages} />
       </div>
     </div>
   );

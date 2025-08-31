@@ -11,8 +11,10 @@ import NewPunFormDialog from "./new-pun-form-dialog";
 
 export default function NewPunContainer(props: {
   puns: Preloaded<typeof api.puns.getRandomizedPuns>;
+  animals: Preloaded<typeof api.animals.getAllAnimals>;
 }) {
   const puns = usePreloadedQuery(props.puns);
+  const animals = usePreloadedQuery(props.animals);
 
   const [openedDialog, setOpenedDialog] = useState<"" | "animal" | "form">("");
 
@@ -32,6 +34,7 @@ export default function NewPunContainer(props: {
       </LegoButton>
 
       <NewPunAnimalDialog
+        animals={animals}
         isOpen={openedDialog === "animal"}
         setIsOpen={(isOpen) => {
           if (isOpen) setOpenedDialog("animal");

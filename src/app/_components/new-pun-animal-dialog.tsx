@@ -1,12 +1,13 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import type {
   EmblaCarouselType,
   EmblaEventType,
   EmblaOptionsType,
 } from "embla-carousel";
 import useEmblaCarousel from "embla-carousel-react";
+import { useAtom } from "jotai";
 import Image from "next/image";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -19,62 +20,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import LegoButton from "@/components/ui/lego-button";
-import { api } from "../../../convex/_generated/api";
+import { animalId } from "@/store/pun";
+import type { api } from "../../../convex/_generated/api";
 
-type Animal = { key: string; name: string; src: string };
-
-function resolveSvgSrc(input: unknown): string {
-  if (!input) return "";
-  if (typeof input === "string") return input;
-  // @ts-expect-error: runtime guard for Next static asset objects
-  if (typeof input.src === "string") return input.src;
-  // @ts-expect-error: runtime guard for possible default export string
-  if (typeof input.default === "string") return input.default;
-  return "";
-}
-
-const ANIMALS: Animal[] = [
-  {
-    key: "maltese_1",
-    name: "잘 익은 말티즈",
-    src: resolveSvgSrc("/maltese/maltese_1.png"),
-  },
-  {
-    key: "maltese_2",
-    name: "말티즈 2",
-    src: resolveSvgSrc("/maltese/maltese_2.png"),
-  },
-  {
-    key: "maltese_3",
-    name: "말티즈 3",
-    src: resolveSvgSrc("/maltese/maltese_3.png"),
-  },
-  {
-    key: "maltese_4",
-    name: "말티즈 4",
-    src: resolveSvgSrc("/maltese/maltese_4.png"),
-  },
-  {
-    key: "maltese_5",
-    name: "말티즈 5",
-    src: resolveSvgSrc("/maltese/maltese_5.png"),
-  },
-  {
-    key: "maltese_6",
-    name: "말티즈 6",
-    src: resolveSvgSrc("/maltese/maltese_6.png"),
-  },
-  {
-    key: "maltese_7",
-    name: "말티즈 7",
-    src: resolveSvgSrc("/maltese/maltese_7.png"),
-  },
-  {
-    key: "maltese_8",
-    name: "말티즈 8",
-    src: resolveSvgSrc("/maltese/maltese_8.png"),
-  },
-];
 const TWEEN_FACTOR_BASE = 0.52;
 
 export default function NewPunAnimalDialog({
@@ -82,14 +30,14 @@ export default function NewPunAnimalDialog({
   setIsOpen,
   openForm,
   children,
+  animals,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   openForm: () => void;
   children: React.ReactNode;
+  animals: FunctionReturnType<typeof api.animals.getAllAnimals>;
 }) {
-  const animals = useQuery(api.animals.getAllAnimals);
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
@@ -136,11 +84,7 @@ export default function NewPunAnimalDialog({
 function AnimalCarousel({
   animals,
 }: {
-  animals: {
-    movementType: string;
-    name: string;
-    imageUrl: string;
-  }[];
+  animals: FunctionReturnType<typeof api.animals.getAllAnimals>;
 }) {
   const options = useMemo<EmblaOptionsType>(
     () => ({
@@ -152,13 +96,26 @@ function AnimalCarousel({
     }),
     [],
   );
+  const [selectedAnimalId, setSelectedAnimalId] = useAtom(animalId);
+
   const [emblaRef, emblaApi] = useEmblaCarousel(options);
+
+  const tweenFactor = useRef(0);
+  const tweenNodes = useRef<HTMLElement[]>([]);
 
   const numberWithinRange = (number: number, min: number, max: number) =>
     Math.min(Math.max(number, min), max);
 
-  const tweenFactor = useRef(0);
-  const tweenNodes = useRef<HTMLElement[]>([]);
+  const onSelect = useCallback(
+    (emblaApi: EmblaCarouselType) => {
+      const selectedIndex = emblaApi.selectedScrollSnap();
+      const animal = animals[selectedIndex];
+      if (animal) {
+        setSelectedAnimalId(animal.id);
+      }
+    },
+    [animals, setSelectedAnimalId],
+  );
 
   const setTweenFactor = useCallback((emblaApi: EmblaCarouselType) => {
     tweenFactor.current = TWEEN_FACTOR_BASE * emblaApi.scrollSnapList().length;
@@ -214,10 +171,21 @@ function AnimalCarousel({
     tweenScale(emblaApi);
 
     emblaApi
+      .on("init", (api) => {
+        if (!selectedAnimalId) {
+          setSelectedAnimalId(animals[0].id);
+          return;
+        }
+        const selectedAnimal = animals.findIndex(
+          (a) => a.id === selectedAnimalId,
+        );
+        api.scrollTo(selectedAnimal, false); // true 로 트랜지션 없애고 싶은데 가운데 이미지가 사라지는 버그가 있음.
+      })
       .on("reInit", setTweenFactor)
       .on("reInit", tweenScale)
       .on("scroll", tweenScale)
-      .on("slideFocus", tweenScale);
+      .on("slideFocus", tweenScale)
+      .on("select", onSelect);
   }, [emblaApi, tweenScale]);
 
   return (

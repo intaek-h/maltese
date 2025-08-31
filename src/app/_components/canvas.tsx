@@ -23,8 +23,8 @@ export default function Canvas(props: {
   puns: Preloaded<typeof api.puns.getRandomizedPuns>;
   animals: Preloaded<typeof api.animals.getAllAnimals>;
 }) {
-  const animals = usePreloadedQuery(props.animals);
   const puns = usePreloadedQuery(props.puns);
+  const animals = usePreloadedQuery(props.animals);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
