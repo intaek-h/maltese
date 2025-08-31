@@ -130,7 +130,7 @@ export async function prevPage({
     return;
   }
 
-  const nextOffset = Number(currentOffset) + DEFAULT_ANIMALS_IN_CANVAS;
+  const nextOffset = Number(currentOffset) - DEFAULT_ANIMALS_IN_CANVAS;
 
   (await cookie).set(COOKIES.offset, nextOffset.toString());
 
