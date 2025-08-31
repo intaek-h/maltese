@@ -2,10 +2,11 @@
 
 import { fetchMutation } from "convex/nextjs";
 import { ConvexError } from "convex/values";
+import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { userAgent } from "next/server";
+import { DEFAULT_ANIMALS_IN_CANVAS, PUN_MAX_LENGTH } from "@/constants/configs";
 import { COOKIES } from "@/constants/cookies";
-import { PUN_MAX_LENGTH } from "@/constants/text";
 import {
   computeContentHash,
   hashIp,
@@ -86,4 +87,52 @@ export async function createPunServerAction(args: {
   }
 
   return { success: true, message: "등록되었습니다." };
+}
+
+export async function nextPage({ hasNextPage }: { hasNextPage: boolean }) {
+  const cookie = cookies();
+
+  const currentOffset = (await cookie).get(COOKIES.offset)?.value || "";
+
+  if (!currentOffset || !hasNextPage || Number.isNaN(Number(currentOffset))) {
+    (await cookie).set(COOKIES.offset, "0");
+    revalidatePath("/");
+    return;
+  }
+
+  const nextOffset = Number(currentOffset) + DEFAULT_ANIMALS_IN_CANVAS;
+
+  (await cookie).set(COOKIES.offset, nextOffset.toString());
+
+  revalidatePath("/");
+}
+
+export async function prevPage({
+  hasPrevPage,
+  lastOffset,
+}: {
+  hasPrevPage: boolean;
+  lastOffset: number;
+}) {
+  const cookie = cookies();
+
+  const currentOffset = (await cookie).get(COOKIES.offset)?.value || "";
+
+  if (!currentOffset || Number.isNaN(Number(currentOffset))) {
+    (await cookie).set(COOKIES.offset, "0");
+    revalidatePath("/");
+    return;
+  }
+
+  if (!hasPrevPage) {
+    (await cookie).set(COOKIES.offset, Number(lastOffset).toString());
+    revalidatePath("/");
+    return;
+  }
+
+  const nextOffset = Number(currentOffset) + DEFAULT_ANIMALS_IN_CANVAS;
+
+  (await cookie).set(COOKIES.offset, nextOffset.toString());
+
+  revalidatePath("/");
 }

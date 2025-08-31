@@ -1,11 +1,10 @@
+import type { Id } from "../../../convex/_generated/dataModel";
+
 export type Animal = {
-  id: number;
+  id: Id<"animals">;
   name: string;
   image: string;
   movement_type: string;
-  created_at: number;
-  updated_at: number;
-  deleted_at: number | null;
 };
 
 export type Word = {

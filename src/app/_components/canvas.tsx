@@ -1,8 +1,8 @@
 "use client";
 
+import { type Preloaded, usePreloadedQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { useEffect, useRef } from "react";
-import animals from "@/dummy/animals.json";
-import words from "@/dummy/words.json";
 import {
   computeNotePlacement,
   defaultNoteStyle,
@@ -13,27 +13,23 @@ import {
   initializeMovement,
   updateMovement,
 } from "@/lib/canvas/movement";
-import type { Animal, MovingAnimal, Word } from "@/lib/canvas/types";
+import type { MovingAnimal } from "@/lib/canvas/types";
+import type { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 
-function fitWithinBounds(
-  naturalWidth: number,
-  naturalHeight: number,
-  maxWidth: number,
-  maxHeight: number,
-) {
-  if (naturalWidth <= 0 || naturalHeight <= 0) {
-    return { width: maxWidth, height: maxHeight };
-  }
-  const scale = Math.min(maxWidth / naturalWidth, maxHeight / naturalHeight);
-  const width = Math.max(1, Math.round(naturalWidth * scale));
-  const height = Math.max(1, Math.round(naturalHeight * scale));
-  return { width, height };
-}
+type AnimalImagesType = FunctionReturnType<typeof api.animals.getAllAnimals>;
 
-export default function Canvas() {
+export default function Canvas(props: {
+  puns: Preloaded<typeof api.puns.getRandomizedPuns>;
+  animals: Preloaded<typeof api.animals.getAllAnimals>;
+}) {
+  const animals = usePreloadedQuery(props.animals);
+  const puns = usePreloadedQuery(props.puns);
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: taken care
   useEffect(() => {
     const canvasEl = canvasRef.current;
     if (!canvasEl) return;
@@ -64,43 +60,28 @@ export default function Canvas() {
     sizeCanvasToWindow();
 
     // Build moving animals: one sprite per word, using a real image asset
-    const animalById = new Map<number, Animal>();
-    for (const animal of animals as Animal[]) animalById.set(animal.id, animal);
+    const animalById = new Map<Id<"animals">, AnimalImagesType[number]>();
+
+    for (const animal of animals) {
+      animalById.set(animal.id, animal);
+    }
 
     const movingAnimals: MovingAnimal[] = [];
-    for (const word of words.slice(0, 3) as Word[]) {
-      const animal = animalById.get(word.animal_id);
+
+    for (const word of puns.items) {
+      const animal = animalById.get(word.animalId);
+
       if (!animal) continue;
-      const pun = `${word.input_1} ${word.input_2}`.trim() || `${animal.name}`;
+
+      const pun =
+        `${word.firstRow} ${word.secondRow}`.trim() || `${animal.name}`;
 
       const imageElement = new Image();
+
       imageElement.crossOrigin = "anonymous";
-      // animal.image is a public path like "/maltese/maltese_1" (without extension)
-      // Try .png first, then fallback to .svg if .png fails
-      const basePath = animal.image;
-      const ensureLeadingSlash = (p: string) =>
-        p.startsWith("/") ? p : `/${p}`;
-      const pngPath = ensureLeadingSlash(
-        basePath.endsWith(".png") || basePath.endsWith(".svg")
-          ? basePath
-          : `${basePath}.png`,
-      );
-      imageElement.src = pngPath;
+      imageElement.src = toOptimizedSrc(animal.imageUrl, 1080); // idk why smaller width is getting not allowed error.
       imageElement.onerror = () => {
-        // If png fails and original didn't specify .svg, try svg
-        const svgCandidate = ensureLeadingSlash(
-          basePath.endsWith(".svg")
-            ? basePath
-            : `${basePath.replace(/\.png$/, "")}.svg`,
-        );
-        if (imageElement.src !== svgCandidate) {
-          imageElement.onerror = () => {
-            moving.isImageLoaded = false;
-          };
-          imageElement.src = svgCandidate;
-        } else {
-          moving.isImageLoaded = false;
-        }
+        moving.isImageLoaded = false;
       };
 
       const width = 140;
@@ -115,10 +96,15 @@ export default function Canvas() {
       const initialY = Math.random() * Math.max(1, logicalHeight - height);
 
       const moving: MovingAnimal = {
-        animal,
+        animal: {
+          id: animal.id,
+          image: animal.imageUrl,
+          movement_type: animal.movementType,
+          name: animal.name,
+        },
         pun,
-        input1: word.input_1,
-        input2: word.input_2,
+        input1: word.firstRow,
+        input2: word.secondRow,
         x: initialX,
         y: initialY,
         velocityX,
@@ -363,7 +349,26 @@ export default function Canvas() {
       canvas.removeEventListener("pointermove", handlePointerMove);
       canvas.removeEventListener("pointerdown", handlePointerDown);
     };
-  }, []);
+  }, [props.puns]);
 
   return <canvas ref={canvasRef} className="h-full w-full" />;
+}
+
+function toOptimizedSrc(url: string, w: number, q = 75) {
+  return `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=${q}`;
+}
+
+function fitWithinBounds(
+  naturalWidth: number,
+  naturalHeight: number,
+  maxWidth: number,
+  maxHeight: number,
+) {
+  if (naturalWidth <= 0 || naturalHeight <= 0) {
+    return { width: maxWidth, height: maxHeight };
+  }
+  const scale = Math.min(maxWidth / naturalWidth, maxHeight / naturalHeight);
+  const width = Math.max(1, Math.round(naturalWidth * scale));
+  const height = Math.max(1, Math.round(naturalHeight * scale));
+  return { width, height };
 }

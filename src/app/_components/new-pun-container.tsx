@@ -1,15 +1,36 @@
 "use client";
 
+import { type Preloaded, usePreloadedQuery } from "convex/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useState } from "react";
 import NewPunAnimalDialog from "@/app/_components/new-pun-animal-dialog";
 import LegoButton from "@/components/ui/lego-button";
+import { nextPage, prevPage } from "@/lib/server-actions/pun/actions";
+import type { api } from "../../../convex/_generated/api";
 import NewPunFormDialog from "./new-pun-form-dialog";
 
-export default function NewPunContainer() {
+export default function NewPunContainer(props: {
+  puns: Preloaded<typeof api.puns.getRandomizedPuns>;
+}) {
+  const puns = usePreloadedQuery(props.puns);
+
   const [openedDialog, setOpenedDialog] = useState<"" | "animal" | "form">("");
 
   return (
-    <div>
+    <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
+      <LegoButton
+        className="w-full sm:w-auto order-2 sm:order-none"
+        variant="secondary"
+        onClick={() =>
+          prevPage({
+            hasPrevPage: puns.hasPrevPage,
+            lastOffset: puns.totalPages * 3 - 3,
+          })
+        }
+      >
+        <ChevronLeftIcon />
+      </LegoButton>
+
       <NewPunAnimalDialog
         isOpen={openedDialog === "animal"}
         setIsOpen={(isOpen) => {
@@ -18,7 +39,10 @@ export default function NewPunContainer() {
         }}
         openForm={() => setOpenedDialog("form")}
       >
-        <LegoButton style={{ opacity: openedDialog !== "" ? 0 : 1 }}>
+        <LegoButton
+          className="w-full col-span-2 order-1 sm:order-none"
+          style={{ opacity: openedDialog !== "" ? 0 : 1 }}
+        >
           나도 말장난 하기
         </LegoButton>
       </NewPunAnimalDialog>
@@ -30,6 +54,14 @@ export default function NewPunContainer() {
           else setOpenedDialog("animal");
         }}
       />
+
+      <LegoButton
+        className="w-full sm:w-auto order-3 sm:order-none"
+        variant="secondary"
+        onClick={() => nextPage({ hasNextPage: puns.hasNextPage })}
+      >
+        <ChevronRightIcon />
+      </LegoButton>
     </div>
   );
 }
