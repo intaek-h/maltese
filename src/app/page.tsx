@@ -5,6 +5,7 @@ import NewPunContainer from "@/app/_components/new-pun-container";
 import { DEFAULT_ANIMALS_IN_CANVAS } from "@/constants/configs";
 import { COOKIES } from "@/constants/cookies";
 import { api } from "../../convex/_generated/api";
+import { PunLoader } from "./_components/pun-loader";
 
 export default async function Home() {
   const cookie = await cookies();
@@ -25,6 +26,8 @@ export default async function Home() {
       <div className="absolute sm:bottom-24 bottom-12 left-1/2 -translate-x-1/2">
         <NewPunContainer puns={paginatedPuns} animals={animalImages} />
       </div>
+
+      <PunLoader />
     </div>
   );
 }

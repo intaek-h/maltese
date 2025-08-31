@@ -1,11 +1,13 @@
 "use client";
 
 import { type Preloaded, usePreloadedQuery } from "convex/react";
+import { useAtom } from "jotai";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import NewPunAnimalDialog from "@/app/_components/new-pun-animal-dialog";
 import LegoButton from "@/components/ui/lego-button";
 import { nextPage, prevPage } from "@/lib/server-actions/pun/actions";
+import { shouldShowPunLoader as shouldShowPunLoaderAtom } from "@/store/pun";
 import type { api } from "../../../convex/_generated/api";
 import NewPunFormDialog from "./new-pun-form-dialog";
 
@@ -16,17 +18,31 @@ export default function NewPunContainer(props: {
   const puns = usePreloadedQuery(props.puns);
   const animals = usePreloadedQuery(props.animals);
 
+  const [isPending, startTransition] = useTransition();
+
+  const [_, setShouldShowPunLoader] = useAtom(shouldShowPunLoaderAtom);
+
   const [openedDialog, setOpenedDialog] = useState<"" | "animal" | "form">("");
 
+  useEffect(() => {
+    if (isPending) {
+      setShouldShowPunLoader(true);
+    } else {
+      setShouldShowPunLoader(false);
+    }
+  }, [isPending, setShouldShowPunLoader]);
+
   return (
-    <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
+    <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4 transition-opacity hover:!opacity-100 duration-300 animate-[fade-to-opacity_3s_ease-in-out_3s_forwards]">
       <LegoButton
         className="w-full sm:w-auto order-2 sm:order-none"
         variant="secondary"
         onClick={() =>
-          prevPage({
-            hasPrevPage: puns.hasPrevPage,
-            lastOffset: puns.totalPages * 3 - 3,
+          startTransition(async () => {
+            await prevPage({
+              hasPrevPage: puns.hasPrevPage,
+              lastOffset: puns.totalPages * 3 - 3,
+            });
           })
         }
       >
@@ -61,7 +77,11 @@ export default function NewPunContainer(props: {
       <LegoButton
         className="w-full sm:w-auto order-3 sm:order-none"
         variant="secondary"
-        onClick={() => nextPage({ hasNextPage: puns.hasNextPage })}
+        onClick={() => {
+          startTransition(async () => {
+            await nextPage({ hasNextPage: puns.hasNextPage });
+          });
+        }}
       >
         <ChevronRightIcon />
       </LegoButton>

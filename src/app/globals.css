@@ -147,4 +147,14 @@
       transform: scale(1.2);
     }
   }
+
+  /* Supports animate-[fade-to-opacity_3s_ease-in-out_3s_forwards] */
+  @keyframes fade-to-opacity {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.3;
+    }
+  }
 }
