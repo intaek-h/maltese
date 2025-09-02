@@ -113,8 +113,10 @@ export const createPun = mutation({
       throw new ConvexError("중복된 말장난입니다.");
     }
 
+    const publicKey = uuidv4();
+
     const punId = await ctx.db.insert("puns", {
-      publicKey: uuidv4(),
+      publicKey,
       firstRow: args.firstRow || undefined,
       secondRow: args.secondRow || undefined,
       animalId: args.animalId,
@@ -131,6 +133,13 @@ export const createPun = mutation({
     const pun = await ctx.db.get(punId);
 
     if (pun) await visiblePunsAggregate.insert(ctx, pun);
+
+    return {
+      publicKey,
+      firstRow: args.firstRow || undefined,
+      secondRow: args.secondRow || undefined,
+      status: "queued",
+    };
   },
 });
 

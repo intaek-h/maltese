@@ -20,7 +20,10 @@ export async function createPunServerAction(args: {
   firstRow: string;
   secondRow: string;
   animalId: Id<"animals">;
-}): Promise<{ success: boolean; message: string }> {
+}): Promise<
+  | { success: false; message: string }
+  | { success: true; message: string; data: { publicKey: string } }
+> {
   const header = await headers();
   const cookie = await cookies();
 
@@ -69,7 +72,7 @@ export async function createPunServerAction(args: {
   }
 
   try {
-    await fetchMutation(api.puns.createPun, {
+    const pun = await fetchMutation(api.puns.createPun, {
       authorKey: authorKey,
       userAgent: sanitizedUA,
       ipHash: ipHash,
@@ -78,15 +81,22 @@ export async function createPunServerAction(args: {
       contentHash: contentHash,
       animalId: args.animalId,
     });
+
+    return {
+      success: true,
+      message: "등록되었습니다.",
+      data: {
+        publicKey: pun.publicKey,
+      },
+    };
   } catch (error) {
-    console.log("Error while calling fetchMutation(): ", error);
+    console.error("Error while calling fetchMutation(): ", error);
     if (error instanceof ConvexError) {
       return { success: false, message: error.data };
     }
-    return { success: false, message: "처리중 오류가 발생했습니다." };
   }
 
-  return { success: true, message: "등록되었습니다." };
+  return { success: false, message: "처리중 오류가 발생했습니다." };
 }
 
 export async function nextPage({ hasNextPage }: { hasNextPage: boolean }) {

@@ -72,6 +72,9 @@ export default function NewPunContainer(props: {
           if (isOpen) setOpenedDialog("form");
           else setOpenedDialog("animal");
         }}
+        onSubmit={() => {
+          setOpenedDialog("");
+        }}
       />
 
       <LegoButton
