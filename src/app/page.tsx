@@ -20,7 +20,10 @@ export default async function Home() {
   });
 
   return (
-    <div className="relative h-screen w-screen">
+    <div
+      className="relative h-screen w-screen bg-cover bg-center"
+      style={{ backgroundImage: `url(/backgrounds/${2}.jpg)` }}
+    >
       <Canvas puns={paginatedPuns} animals={animalImages} />
 
       <div className="absolute sm:bottom-24 bottom-12 left-1/2 -translate-x-1/2">

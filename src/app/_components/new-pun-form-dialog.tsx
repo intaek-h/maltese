@@ -108,28 +108,27 @@ export default function NewPunFormDialog({
                   try {
                     setIsSaving(true);
 
-                    await new Promise<void>((r) => setTimeout(() => r(), 2000));
+                    // await new Promise<void>((r) => setTimeout(() => r(), 2000));
 
-                    // const response = await createPunServerAction({
-                    //   firstRow: row1,
-                    //   secondRow: row2,
-                    //   animalId: animal,
-                    // });
+                    const response = await createPunServerAction({
+                      firstRow: row1,
+                      secondRow: row2,
+                      animalId: animal,
+                    });
 
-                    // if (response.success) {
-                    // }
+                    if (response.success) {
+                      router.push(`/?key=${response.data.publicKey}`);
+                      onSubmit();
+                      return;
+                    }
 
-                    onSubmit();
-
-                    router.push("/?key=990");
+                    throw undefined;
                   } catch (error) {
                     if (error instanceof ConvexError) {
                       alert(error.data);
                       return;
                     }
                     alert("저장 중 오류가 발생했습니다.");
-                  } finally {
-                    setIsSaving(false);
                   }
                 }}
               >
