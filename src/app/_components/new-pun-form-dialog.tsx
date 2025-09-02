@@ -108,13 +108,13 @@ export default function NewPunFormDialog({
                   try {
                     setIsSaving(true);
 
-                    // await new Promise<void>((r) => setTimeout(() => r(), 2000));
-
                     const response = await createPunServerAction({
                       firstRow: row1,
                       secondRow: row2,
                       animalId: animal,
                     });
+
+                    await new Promise<void>((r) => setTimeout(() => r(), 2000));
 
                     if (response.success) {
                       router.push(`/?key=${response.data.publicKey}`);
