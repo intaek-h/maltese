@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently npm:dev:client npm:dev:server",
-    "dev:client": "next dev --turbopack",
-    "dev:server": "convex dev",
+    "dev": "concurrently npm:dev:next npm:dev:convex",
+    "dev:next": "next dev --turbopack",
+    "dev:convex": "convex dev",
     "convex": "convex dev",
     "build": "next build --turbopack",
     "start": "next start",
