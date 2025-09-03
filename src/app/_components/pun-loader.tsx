@@ -18,7 +18,7 @@ const art_3 = [
 export function PunLoader() {
   const [shouldShowPunLoader] = useAtom(shouldShowPunLoaderAtom);
 
-  // if (!shouldShowPunLoader) return null;
+  if (!shouldShowPunLoader) return null;
 
   return (
     <div className="fixed flex justify-center items-center top-0 left-0 right-0 bottom-0 bg-accent-foreground text-amber-400">
