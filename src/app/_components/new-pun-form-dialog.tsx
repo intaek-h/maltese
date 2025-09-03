@@ -129,6 +129,8 @@ export default function NewPunFormDialog({
                       return;
                     }
                     alert("저장 중 오류가 발생했습니다.");
+                  } finally {
+                    setIsSaving(false);
                   }
                 }}
               >

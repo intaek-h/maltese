@@ -2,7 +2,7 @@
 
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import Image from "next/image";
-import { useCallback } from "react";
+import { useLayoutEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 
@@ -13,11 +13,13 @@ export default function NewPunSavingDialog({
   isOpen: boolean;
   children?: React.ReactNode;
 }) {
-  // biome-ignore lint/correctness/useExhaustiveDependencies: i know
-  const rand = useCallback(
-    () => randomIntFromInterval({ min: 1, max: 5 }),
-    [isOpen],
-  );
+  const [randomIndex, setRandomIndex] = useState<null | number>(null);
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      setRandomIndex(randomIntFromInterval({ min: 1, max: 5 }));
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen}>
@@ -34,10 +36,11 @@ export default function NewPunSavingDialog({
         </VisuallyHidden>
         <div className="w-full h-full flex items-center justify-center">
           <div>
-            <p className="font-serif text-4xl italic">저 장 중 . . .</p>
+            <p className="font-serif text-4xl italic">저 장 중 입니다</p>
 
             <Image
-              src={`/stickers/${rand()}.webp`}
+              unoptimized
+              src={`/stickers/${randomIndex}.webp`}
               width={300}
               height={300}
               alt=""
