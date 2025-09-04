@@ -3,6 +3,7 @@
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { useEffect, useRef } from "react";
+import type React from "react";
 import {
   computeNotePlacement,
   defaultNoteStyle,
@@ -31,6 +32,52 @@ export default function Canvas(props: {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const movingAnimalsRef = useRef<MovingAnimal[] | null>(null);
+  const logicalSizeRef = useRef<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+
+  function getCanvasPoint(
+    evt: PointerEvent | React.PointerEvent<HTMLCanvasElement>,
+  ) {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const { width, height } = logicalSizeRef.current;
+    const scaleX = rect.width > 0 ? width / rect.width : 1;
+    const scaleY = rect.height > 0 ? height / rect.height : 1;
+    const x = (evt.clientX - rect.left) * scaleX;
+    const y = (evt.clientY - rect.top) * scaleY;
+    return { x, y };
+  }
+
+  function hitTest(x: number, y: number) {
+    const movingAnimals = movingAnimalsRef.current;
+    if (!movingAnimals) return undefined;
+    for (let i = movingAnimals.length - 1; i >= 0; i--) {
+      const m = movingAnimals[i];
+      if (x >= m.x && x <= m.x + m.width && y >= m.y && y <= m.y + m.height) {
+        return m;
+      }
+    }
+    return undefined;
+  }
+
+  const onPointerMove = (evt: React.PointerEvent<HTMLCanvasElement>) => {
+    const { x, y } = getCanvasPoint(evt);
+    const hit = hitTest(x, y);
+    const canvas = canvasRef.current;
+    if (canvas) canvas.style.cursor = hit ? "pointer" : "default";
+  };
+
+  const onPointerDown = (evt: React.PointerEvent<HTMLCanvasElement>) => {
+    const { x, y } = getCanvasPoint(evt);
+    const hit = hitTest(x, y);
+    if (hit) {
+      window.alert("clicked");
+    }
+  };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: taken care
   useEffect(() => {
@@ -58,6 +105,7 @@ export default function Canvas(props: {
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
       context.imageSmoothingEnabled = true;
       context.imageSmoothingQuality = "high";
+      logicalSizeRef.current = { width: logicalWidth, height: logicalHeight };
     }
 
     sizeCanvasToWindow();
@@ -180,6 +228,7 @@ export default function Canvas(props: {
         moving.isImageLoaded = false;
       };
     }
+    movingAnimalsRef.current = movingAnimals;
 
     let previousTimestampMs: number | null = null;
 
@@ -303,58 +352,7 @@ export default function Canvas(props: {
 
     window.addEventListener("resize", handleResize);
 
-    // Ensure input/loop work after bfcache restore (back/forward)
-    function handlePageShow(_evt: PageTransitionEvent) {
-      // Recompute sizes under current DPR
-      sizeCanvasToWindow();
-      // Rebind listeners defensively (avoid duplicates)
-      canvas.removeEventListener("pointermove", handlePointerMove);
-      canvas.removeEventListener("pointerdown", handlePointerDown);
-      canvas.addEventListener("pointermove", handlePointerMove);
-      canvas.addEventListener("pointerdown", handlePointerDown);
-      // Restart RAF loop with fresh timestamp baseline
-      if (animationFrameRef.current != null) {
-        window.cancelAnimationFrame(animationFrameRef.current);
-      }
-      previousTimestampMs = null;
-      animationFrameRef.current = window.requestAnimationFrame(
-        loopWithHighlight,
-      );
-    }
-    window.addEventListener("pageshow", handlePageShow);
-
-    function getCanvasPoint(evt: PointerEvent) {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = rect.width > 0 ? logicalWidth / rect.width : 1;
-      const scaleY = rect.height > 0 ? logicalHeight / rect.height : 1;
-      const x = (evt.clientX - rect.left) * scaleX;
-      const y = (evt.clientY - rect.top) * scaleY;
-      return { x, y };
-    }
-
-    function hitTest(x: number, y: number) {
-      for (let i = movingAnimals.length - 1; i >= 0; i--) {
-        const m = movingAnimals[i];
-        if (x >= m.x && x <= m.x + m.width && y >= m.y && y <= m.y + m.height) {
-          return m;
-        }
-      }
-      return undefined;
-    }
-
-    function handlePointerMove(evt: PointerEvent) {
-      const { x, y } = getCanvasPoint(evt);
-      const hit = hitTest(x, y);
-      canvas.style.cursor = hit ? "pointer" : "default";
-    }
-
-    function handlePointerDown(evt: PointerEvent) {
-      const { x, y } = getCanvasPoint(evt);
-      const hit = hitTest(x, y);
-      if (hit) {
-        window.alert("clicked");
-      }
-    }
+    // Remove imperative pointer listeners; React handlers are used instead
 
     function tickHighlight(deltaSeconds: number) {
       for (const m of movingAnimals) {
@@ -388,9 +386,6 @@ export default function Canvas(props: {
         window.requestAnimationFrame(loopWithHighlight);
     }
 
-    // Switch listener and loop
-    canvas.addEventListener("pointermove", handlePointerMove);
-    canvas.addEventListener("pointerdown", handlePointerDown);
     // Stop old loop if started (defensive), then start new one
     if (animationFrameRef.current != null) {
       window.cancelAnimationFrame(animationFrameRef.current);
@@ -402,13 +397,17 @@ export default function Canvas(props: {
         window.cancelAnimationFrame(animationFrameRef.current);
       }
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("pageshow", handlePageShow);
-      canvas.removeEventListener("pointermove", handlePointerMove);
-      canvas.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [props.puns]);
 
-  return <canvas ref={canvasRef} className="h-full w-full touch-none" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="h-full w-full"
+      onPointerMove={onPointerMove}
+      onPointerDown={onPointerDown}
+    />
+  );
 }
 
 function toOptimizedSrc(url: string, w: number, q = 75) {
