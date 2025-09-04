@@ -29,18 +29,18 @@ export function CanvasBackground({
     }
 
     // 새로고침하면 토스트 등록되기 전에 돌아서 안뜸.
-    const timerId_1 = setTimeout(() => {
-      customToast({
-        title: "링크를 저장하면 다시 방문할 수 있습니다.",
-        button: {
-          label: "링크 복사",
-          onClick: async () => {
-            await copyTextToClipboard(window.location.href);
-            customToast({ title: "링크를 복사했습니다." });
-          },
-        },
-      });
-    }, 100);
+    // const timerId_1 = setTimeout(() => {
+      // customToast({
+        // title: "링크를 저장하면 다시 방문할 수 있습니다.",
+        // button: {
+          // label: "링크 복사",
+          // onClick: async () => {
+            // await copyTextToClipboard(window.location.href);
+            // customToast({ title: "링크를 복사했습니다." });
+          // },
+       // },
+     // });
+    // }, 100);
 
     const timerId_2 = setTimeout(() => {
       customToast({
@@ -63,7 +63,7 @@ export function CanvasBackground({
 
     return () => {
       toast.dismiss();
-      clearTimeout(timerId_1);
+      // clearTimeout(timerId_1);
       clearTimeout(timerId_2);
     };
   }, [highlightedPun, router, setShouldShowPunLoader]);
@@ -73,9 +73,9 @@ export function CanvasBackground({
       className="relative h-screen w-screen bg-cover bg-center"
       style={{
         backgroundImage: `url(/backgrounds/2.jpg)`,
-        boxShadow: highlightedPun
-          ? "0 0 200px rgba(0,0,0,0.9) inset"
-          : undefined,
+        // boxShadow: highlightedPun
+         // ? "0 0 200px rgba(0,0,0,0.9) inset"
+         // : undefined,
       }}
     >
       {children}
