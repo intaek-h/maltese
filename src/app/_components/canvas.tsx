@@ -16,15 +16,18 @@ import {
 import type { MovingAnimal } from "@/lib/canvas/types";
 import type { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import type { PunStatusType } from "../../../convex/types/pun";
 
 type AnimalImagesType = FunctionReturnType<typeof api.animals.getAllAnimals>;
 
 export default function Canvas(props: {
   puns: Preloaded<typeof api.puns.getRandomizedPuns>;
   animals: Preloaded<typeof api.animals.getAllAnimals>;
+  highlightedPun: FunctionReturnType<typeof api.puns.getPunByPubKey>;
 }) {
   const puns = usePreloadedQuery(props.puns);
   const animals = usePreloadedQuery(props.animals);
+  const highlightedPun = props.highlightedPun;
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -68,7 +71,10 @@ export default function Canvas(props: {
 
     const movingAnimals: MovingAnimal[] = [];
 
-    for (const word of puns.items) {
+    for (const word of mergePuns({
+      puns: puns.items,
+      addedPun: highlightedPun,
+    })) {
       const animal = animalById.get(word.animalId);
 
       if (!animal) continue;
@@ -92,8 +98,16 @@ export default function Canvas(props: {
       const velocityY = Math.sin(angle) * speed;
 
       // Initial position
+      const isHighlighted = Boolean(
+        highlightedPun && word.publicKey === highlightedPun.publicKey,
+      );
       const initialX = Math.random() * Math.max(1, logicalWidth - width);
-      const initialY = Math.random() * Math.max(1, logicalHeight - height);
+      const initialY = isHighlighted
+        ? Math.max(
+            0,
+            Math.min(logicalHeight - height - 200, logicalHeight - height),
+          )
+        : Math.random() * Math.max(1, logicalHeight - height);
 
       const moving: MovingAnimal = {
         animal: {
@@ -105,6 +119,8 @@ export default function Canvas(props: {
         pun,
         input1: word.firstRow,
         input2: word.secondRow,
+        status: toPunStatus(word.status),
+        isHighlighted,
         x: initialX,
         y: initialY,
         velocityX,
@@ -145,10 +161,20 @@ export default function Canvas(props: {
           0,
           Math.min(logicalCanvasWidth - moving.width, moving.x),
         );
-        moving.y = Math.max(
-          0,
-          Math.min(logicalCanvasHeight - moving.height, moving.y),
-        );
+        if (moving.isHighlighted) {
+          moving.y = Math.max(
+            0,
+            Math.min(
+              logicalCanvasHeight - moving.height - 200,
+              logicalCanvasHeight - moving.height,
+            ),
+          );
+        } else {
+          moving.y = Math.max(
+            0,
+            Math.min(logicalCanvasHeight - moving.height, moving.y),
+          );
+        }
       };
       moving.imageElement.onerror = () => {
         moving.isImageLoaded = false;
@@ -262,6 +288,16 @@ export default function Canvas(props: {
           logicalWidth,
           logicalHeight,
         );
+        // After generic resize, re-apply bottom offset for highlighted sprite
+        if (moving.isHighlighted) {
+          moving.y = Math.max(
+            0,
+            Math.min(
+              logicalHeight - moving.height - 200,
+              logicalHeight - moving.height,
+            ),
+          );
+        }
       }
     }
 
@@ -371,4 +407,27 @@ function fitWithinBounds(
   const width = Math.max(1, Math.round(naturalWidth * scale));
   const height = Math.max(1, Math.round(naturalHeight * scale));
   return { width, height };
+}
+
+function mergePuns({
+  puns,
+  addedPun,
+}: {
+  puns: FunctionReturnType<typeof api.puns.getRandomizedPuns>["items"];
+  addedPun: FunctionReturnType<typeof api.puns.getPunByPubKey>;
+}) {
+  if (!addedPun) {
+    return puns;
+  }
+  if (puns.map((p) => p.publicKey).includes(addedPun.publicKey)) {
+    return puns;
+  }
+  return puns.concat(addedPun);
+}
+
+function toPunStatus(status: unknown): PunStatusType {
+  if (status === "visible" || status === "hidden" || status === "queued") {
+    return status;
+  }
+  return "queued";
 }

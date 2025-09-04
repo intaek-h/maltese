@@ -12,6 +12,7 @@ import type * as animals from "../animals.js";
 import type * as puns from "../puns.js";
 import type * as reports from "../reports.js";
 import type * as sanitize from "../sanitize.js";
+import type * as types_pun from "../types/pun.js";
 
 import type {
   ApiFromModules,
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   puns: typeof puns;
   reports: typeof reports;
   sanitize: typeof sanitize;
+  "types/pun": typeof types_pun;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

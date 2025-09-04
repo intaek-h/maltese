@@ -1,4 +1,5 @@
 import type { Id } from "../../../convex/_generated/dataModel";
+import type { PunStatusType } from "../../../convex/types/pun";
 
 export type Animal = {
   id: Id<"animals">;
@@ -25,6 +26,10 @@ export type MovingAnimal = {
   pun: string;
   input1?: string;
   input2?: string;
+  // Status of the underlying pun (e.g., "visible" | "hidden" | "queued")
+  status?: PunStatusType;
+  // True if this sprite was added due to URL key highlight
+  isHighlighted?: boolean;
   x: number;
   y: number;
   velocityX: number;
