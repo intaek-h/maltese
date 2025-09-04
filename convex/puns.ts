@@ -67,6 +67,7 @@ export const getRandomizedPuns = query({
           firstRow: doc.firstRow,
           secondRow: doc.secondRow,
           likeCount: doc.likeCount,
+          status: doc.status,
           reportCount: doc.reportCount,
           animalId: doc.animalId,
           publicKey: doc.publicKey,
@@ -83,6 +84,43 @@ export const getRandomizedPuns = query({
       currentPage,
       hasNextPage: args.offset + args.numItems < count,
       hasPrevPage: args.offset > 0,
+    };
+  },
+});
+
+export const getPunByPubKey = query({
+  args: {
+    publicKey: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // TODO
+    // const isValidUUID = validateUUID(args.publicKey);
+
+    // if (!isValidUUID) {
+    //   throw new ConvexError("유효한 키가 아닙니다.");
+    // }
+
+    if (!args.publicKey) {
+      return null;
+    }
+
+    const pun = await ctx.db
+      .query("puns")
+      .withIndex("by_public_key", (q) => q.eq("publicKey", args.publicKey))
+      .unique();
+
+    if (!pun) {
+      return null;
+    }
+
+    return {
+      firstRow: pun.firstRow,
+      secondRow: pun.secondRow,
+      likeCount: pun.likeCount,
+      status: pun.status,
+      reportCount: pun.reportCount,
+      animalId: pun.animalId,
+      publicKey: pun.publicKey,
     };
   },
 });

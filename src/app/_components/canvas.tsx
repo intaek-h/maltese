@@ -22,9 +22,11 @@ type AnimalImagesType = FunctionReturnType<typeof api.animals.getAllAnimals>;
 export default function Canvas(props: {
   puns: Preloaded<typeof api.puns.getRandomizedPuns>;
   animals: Preloaded<typeof api.animals.getAllAnimals>;
+  highlightedPun: Preloaded<typeof api.puns.getPunByPubKey>;
 }) {
   const puns = usePreloadedQuery(props.puns);
   const animals = usePreloadedQuery(props.animals);
+  const highlightedPun = usePreloadedQuery(props.highlightedPun);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -68,7 +70,10 @@ export default function Canvas(props: {
 
     const movingAnimals: MovingAnimal[] = [];
 
-    for (const word of puns.items) {
+    for (const word of mergePuns({
+      puns: puns.items,
+      addedPun: highlightedPun,
+    })) {
       const animal = animalById.get(word.animalId);
 
       if (!animal) continue;
@@ -371,4 +376,20 @@ function fitWithinBounds(
   const width = Math.max(1, Math.round(naturalWidth * scale));
   const height = Math.max(1, Math.round(naturalHeight * scale));
   return { width, height };
+}
+
+function mergePuns({
+  puns,
+  addedPun,
+}: {
+  puns: FunctionReturnType<typeof api.puns.getRandomizedPuns>["items"];
+  addedPun: FunctionReturnType<typeof api.puns.getPunByPubKey>;
+}) {
+  if (!addedPun) {
+    return puns;
+  }
+  if (puns.map((p) => p.publicKey).includes(addedPun.publicKey)) {
+    return puns;
+  }
+  return puns.concat(addedPun);
 }
