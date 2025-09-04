@@ -62,6 +62,24 @@ export function CanvasBackground({
     };
   }, [highlightedPun, router]);
 
+  // Ensure loader overlay never persists after back/forward or tab restore
+  useEffect(() => {
+    function hideLoader() {
+      setShouldShowPunLoader(false);
+    }
+    function handleVisibility() {
+      if (document.visibilityState === "visible") hideLoader();
+    }
+    window.addEventListener("pageshow", hideLoader);
+    document.addEventListener("visibilitychange", handleVisibility);
+    // Run once on mount as a safety
+    hideLoader();
+    return () => {
+      window.removeEventListener("pageshow", hideLoader);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [setShouldShowPunLoader]);
+
   return (
     <div
       className="relative h-screen w-screen bg-cover bg-center"

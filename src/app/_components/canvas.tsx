@@ -303,6 +303,26 @@ export default function Canvas(props: {
 
     window.addEventListener("resize", handleResize);
 
+    // Ensure input/loop work after bfcache restore (back/forward)
+    function handlePageShow(_evt: PageTransitionEvent) {
+      // Recompute sizes under current DPR
+      sizeCanvasToWindow();
+      // Rebind listeners defensively (avoid duplicates)
+      canvas.removeEventListener("pointermove", handlePointerMove);
+      canvas.removeEventListener("pointerdown", handlePointerDown);
+      canvas.addEventListener("pointermove", handlePointerMove);
+      canvas.addEventListener("pointerdown", handlePointerDown);
+      // Restart RAF loop with fresh timestamp baseline
+      if (animationFrameRef.current != null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+      }
+      previousTimestampMs = null;
+      animationFrameRef.current = window.requestAnimationFrame(
+        loopWithHighlight,
+      );
+    }
+    window.addEventListener("pageshow", handlePageShow);
+
     function getCanvasPoint(evt: PointerEvent) {
       const rect = canvas.getBoundingClientRect();
       const scaleX = rect.width > 0 ? logicalWidth / rect.width : 1;
@@ -382,12 +402,13 @@ export default function Canvas(props: {
         window.cancelAnimationFrame(animationFrameRef.current);
       }
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("pageshow", handlePageShow);
       canvas.removeEventListener("pointermove", handlePointerMove);
       canvas.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [props.puns]);
 
-  return <canvas ref={canvasRef} className="h-full w-full" />;
+  return <canvas ref={canvasRef} className="h-full w-full touch-none" />;
 }
 
 function toOptimizedSrc(url: string, w: number, q = 75) {
