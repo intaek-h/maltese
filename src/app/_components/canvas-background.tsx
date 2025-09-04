@@ -31,6 +31,19 @@ export function CanvasBackground({
     // 새로고침하면 토스트 등록되기 전에 돌아서 안뜸.
     const timerId_1 = setTimeout(() => {
       customToast({
+        title: "링크를 저장하면 다시 방문할 수 있습니다.",
+        button: {
+          label: "링크 복사",
+          onClick: async () => {
+            await copyTextToClipboard(window.location.href);
+            customToast({ title: "링크를 복사했습니다." });
+          },
+        },
+      });
+    }, 100);
+
+    const timerId_2 = setTimeout(() => {
+      customToast({
         title: "⭐ 미리보기 화면입니다.",
         description: "제출하신 말장난은 검수가 끝난 뒤 정식 등록됩니다.",
         button: {
@@ -43,19 +56,6 @@ export function CanvasBackground({
 
             router.push("/");
             setShouldShowPunLoader(false);
-          },
-        },
-      });
-    }, 100);
-
-    const timerId_2 = setTimeout(() => {
-      customToast({
-        title: "링크를 저장하면 다시 방문할 수 있습니다.",
-        button: {
-          label: "링크 복사",
-          onClick: async () => {
-            await copyTextToClipboard(window.location.href);
-            customToast({ title: "링크를 복사했습니다." });
           },
         },
       });
