@@ -4,7 +4,7 @@ import { ConvexError } from "convex/values";
 import { useAtom } from "jotai";
 import { ArrowLeftIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import NewPunForm from "@/app/_components/new-pun-form";
 import NewPunSavingDialog from "@/app/_components/new-pun-saving-dialog";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,8 @@ export default function NewPunFormDialog({
   const [row1, setRow1] = useAtom(firstRow);
   const [row2, setRow2] = useAtom(secondRow);
   const [animal, setAnimal] = useAtom(animalId);
+
+  const [isPending, startTransition] = useTransition();
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -118,11 +120,13 @@ export default function NewPunFormDialog({
                     await new Promise<void>((r) => setTimeout(() => r(), 2000));
 
                     if (response.success) {
-                      router.push(`/?key=${response.data.publicKey}`);
-                      onSubmit();
-                      setRow1("");
-                      setRow2("");
-                      setAnimal("" as Id<"animals">);
+                      startTransition(() => {
+                        onSubmit();
+                        setRow1("");
+                        setRow2("");
+                        setAnimal("" as Id<"animals">);
+                        router.push(`/?key=${response.data.publicKey}`);
+                      });
                       return;
                     }
 
@@ -143,7 +147,7 @@ export default function NewPunFormDialog({
             </div>
           </div>
 
-          <NewPunSavingDialog isOpen={isSaving} />
+          <NewPunSavingDialog isOpen={isSaving || isPending} />
         </div>
       </DialogContent>
     </Dialog>
