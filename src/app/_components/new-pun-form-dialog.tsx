@@ -29,6 +29,7 @@ import {
 import LegoButton from "@/components/ui/lego-button";
 import { createPunServerAction } from "@/lib/server-actions/pun/actions";
 import { animalId, firstRow, secondRow } from "@/store/pun";
+import type { Id } from "../../../convex/_generated/dataModel";
 
 export default function NewPunFormDialog({
   isOpen,
@@ -43,9 +44,9 @@ export default function NewPunFormDialog({
 }) {
   const router = useRouter();
 
-  const [row1] = useAtom(firstRow);
-  const [row2] = useAtom(secondRow);
-  const [animal] = useAtom(animalId);
+  const [row1, setRow1] = useAtom(firstRow);
+  const [row2, setRow2] = useAtom(secondRow);
+  const [animal, setAnimal] = useAtom(animalId);
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -119,6 +120,9 @@ export default function NewPunFormDialog({
                     if (response.success) {
                       router.push(`/?key=${response.data.publicKey}`);
                       onSubmit();
+                      setRow1("");
+                      setRow2("");
+                      setAnimal("" as Id<"animals">);
                       return;
                     }
 
