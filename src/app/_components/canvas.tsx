@@ -98,8 +98,16 @@ export default function Canvas(props: {
       const velocityY = Math.sin(angle) * speed;
 
       // Initial position
+      const isHighlighted = Boolean(
+        highlightedPun && word.publicKey === highlightedPun.publicKey,
+      );
       const initialX = Math.random() * Math.max(1, logicalWidth - width);
-      const initialY = Math.random() * Math.max(1, logicalHeight - height);
+      const initialY = isHighlighted
+        ? Math.max(
+            0,
+            Math.min(logicalHeight - height - 200, logicalHeight - height),
+          )
+        : Math.random() * Math.max(1, logicalHeight - height);
 
       const moving: MovingAnimal = {
         animal: {
@@ -112,9 +120,7 @@ export default function Canvas(props: {
         input1: word.firstRow,
         input2: word.secondRow,
         status: toPunStatus(word.status),
-        isHighlighted: Boolean(
-          highlightedPun && word.publicKey === highlightedPun.publicKey,
-        ),
+        isHighlighted,
         x: initialX,
         y: initialY,
         velocityX,
@@ -155,10 +161,20 @@ export default function Canvas(props: {
           0,
           Math.min(logicalCanvasWidth - moving.width, moving.x),
         );
-        moving.y = Math.max(
-          0,
-          Math.min(logicalCanvasHeight - moving.height, moving.y),
-        );
+        if (moving.isHighlighted) {
+          moving.y = Math.max(
+            0,
+            Math.min(
+              logicalCanvasHeight - moving.height - 200,
+              logicalCanvasHeight - moving.height,
+            ),
+          );
+        } else {
+          moving.y = Math.max(
+            0,
+            Math.min(logicalCanvasHeight - moving.height, moving.y),
+          );
+        }
       };
       moving.imageElement.onerror = () => {
         moving.isImageLoaded = false;
@@ -272,6 +288,16 @@ export default function Canvas(props: {
           logicalWidth,
           logicalHeight,
         );
+        // After generic resize, re-apply bottom offset for highlighted sprite
+        if (moving.isHighlighted) {
+          moving.y = Math.max(
+            0,
+            Math.min(
+              logicalHeight - moving.height - 200,
+              logicalHeight - moving.height,
+            ),
+          );
+        }
       }
     }
 
