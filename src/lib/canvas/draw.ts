@@ -375,6 +375,11 @@ export function drawScene(
     // Draw note with input_1 and input_2
     drawNote(ctx, canvas, moving, defaultNoteStyle);
 
+    // Draw status badge for highlighted pun
+    if (moving.isHighlighted) {
+      drawStatusBadge(ctx, canvas, moving);
+    }
+
     if ((moving.highlightRemainingMs ?? 0) > 0) {
       ctx.strokeStyle = "#facc15";
       ctx.lineWidth = 3;
@@ -386,4 +391,81 @@ export function drawScene(
       );
     }
   }
+}
+
+function drawStatusBadge(
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  moving: MovingAnimal,
+) {
+  const status = moving.status || "queued";
+  const label =
+    status === "queued"
+      ? "등록 대기중"
+      : status === "visible"
+        ? "등록됨"
+        : status === "hidden"
+          ? "노출 제한됨"
+          : status;
+
+  const colors: Record<string, { bg: string; fg: string; border: string }> = {
+    queued: { bg: "#fef3c7", fg: "#92400e", border: "#f59e0b" }, // amber
+    visible: { bg: "#dcfce7", fg: "#065f46", border: "#22c55e" }, // green
+    hidden: { bg: "#fee2e2", fg: "#7f1d1d", border: "#ef4444" }, // red
+  };
+  const theme = colors[status] || {
+    bg: "#e5e7eb",
+    fg: "#111827",
+    border: "#6b7280",
+  }; // gray
+
+  const paddingX = 8;
+  const paddingY = 4;
+  const radius = 999; // pill
+  const gap = 6; // distance below sprite
+  const font =
+    "700 12px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial";
+
+  ctx.save();
+  ctx.font = font;
+  ctx.textBaseline = "middle";
+  const textWidth = Math.ceil(ctx.measureText(label).width);
+  const boxWidth = textWidth + paddingX * 2;
+  const boxHeight = 18 + paddingY * 0; // ~18px height for 12px font line
+
+  const centerX = moving.x + moving.width / 2;
+  let boxX = Math.round(centerX - boxWidth / 2);
+  let boxY = Math.round(moving.y + moving.height + gap);
+
+  const t = ctx.getTransform();
+  const logicalCanvasWidth = canvas.width / (t.a || 1);
+  const logicalCanvasHeight = canvas.height / (t.d || 1);
+  const margin = 4;
+
+  // Clamp horizontally fully within canvas
+  boxX = Math.max(
+    margin,
+    Math.min(boxX, logicalCanvasWidth - boxWidth - margin),
+  );
+  // Clamp vertically to bottom edge; badge should stay below the animal
+  if (boxY + boxHeight > logicalCanvasHeight - margin) {
+    boxY = logicalCanvasHeight - margin - boxHeight;
+  }
+
+  // Background
+  ctx.fillStyle = theme.bg;
+  createRoundedRectPath(ctx, boxX, boxY, boxWidth, boxHeight, radius);
+  ctx.fill();
+
+  // Border
+  ctx.strokeStyle = theme.border;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Text
+  ctx.fillStyle = theme.fg;
+  const textX = boxX + paddingX;
+  const textY = boxY + boxHeight / 2;
+  ctx.fillText(label, textX, textY);
+  ctx.restore();
 }

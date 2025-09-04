@@ -92,6 +92,7 @@ export const getPunByPubKey = query({
   args: {
     publicKey: v.string(),
   },
+  // throw 하면 preloadQuery 에서 에러 핸들링할 방법이 없음. 그냥 null 리턴으로 쉽게 가자.
   handler: async (ctx, args) => {
     // TODO
     // const isValidUUID = validateUUID(args.publicKey);

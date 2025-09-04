@@ -1,11 +1,12 @@
-import { preloadQuery } from "convex/nextjs";
+import { fetchQuery, preloadQuery } from "convex/nextjs";
+import type { FunctionReturnType } from "convex/server";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import Canvas from "@/app/_components/canvas";
 import NewPunContainer from "@/app/_components/new-pun-container";
 import { DEFAULT_ANIMALS_IN_CANVAS } from "@/constants/configs";
 import { COOKIES } from "@/constants/cookies";
 import { api } from "../../convex/_generated/api";
+import { CanvasBackground } from "./_components/canvas-background";
 import { PunLoader } from "./_components/pun-loader";
 
 export default async function Home({
@@ -25,15 +26,19 @@ export default async function Home({
     offset: Number(offset),
     numItems: DEFAULT_ANIMALS_IN_CANVAS,
   });
-  const highlightedPun = await preloadQuery(api.puns.getPunByPubKey, {
-    publicKey: punPublicKey,
-  });
+
+  let highlightedPun: FunctionReturnType<
+    typeof api.puns.getPunByPubKey
+  > | null = null;
+
+  if (punPublicKey) {
+    highlightedPun = await fetchQuery(api.puns.getPunByPubKey, {
+      publicKey: punPublicKey,
+    });
+  }
 
   return (
-    <div
-      className="relative h-screen w-screen bg-cover bg-center"
-      style={{ backgroundImage: `url(/backgrounds/${2}.jpg)` }}
-    >
+    <CanvasBackground highlightedPun={highlightedPun}>
       <Canvas
         puns={paginatedPuns}
         animals={animalImages}
@@ -45,6 +50,6 @@ export default async function Home({
       </div>
 
       <PunLoader />
-    </div>
+    </CanvasBackground>
   );
 }

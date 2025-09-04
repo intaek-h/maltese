@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "sonner";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import { JotaiProvider } from "@/components/providers/jotai-provider";
 
@@ -21,6 +22,15 @@ export default function RootLayout({
             <main>{children}</main>
 
             <div id="dialog-root" />
+
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                className: "w-full sm:w-[var(--width)]",
+              }}
+              expand
+              visibleToasts={3}
+            />
           </JotaiProvider>
         </ConvexClientProvider>
       </body>

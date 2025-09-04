@@ -16,17 +16,18 @@ import {
 import type { MovingAnimal } from "@/lib/canvas/types";
 import type { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import type { PunStatusType } from "../../../convex/types/pun";
 
 type AnimalImagesType = FunctionReturnType<typeof api.animals.getAllAnimals>;
 
 export default function Canvas(props: {
   puns: Preloaded<typeof api.puns.getRandomizedPuns>;
   animals: Preloaded<typeof api.animals.getAllAnimals>;
-  highlightedPun: Preloaded<typeof api.puns.getPunByPubKey>;
+  highlightedPun: FunctionReturnType<typeof api.puns.getPunByPubKey>;
 }) {
   const puns = usePreloadedQuery(props.puns);
   const animals = usePreloadedQuery(props.animals);
-  const highlightedPun = usePreloadedQuery(props.highlightedPun);
+  const highlightedPun = props.highlightedPun;
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -110,6 +111,10 @@ export default function Canvas(props: {
         pun,
         input1: word.firstRow,
         input2: word.secondRow,
+        status: toPunStatus(word.status),
+        isHighlighted: Boolean(
+          highlightedPun && word.publicKey === highlightedPun.publicKey,
+        ),
         x: initialX,
         y: initialY,
         velocityX,
@@ -392,4 +397,11 @@ function mergePuns({
     return puns;
   }
   return puns.concat(addedPun);
+}
+
+function toPunStatus(status: unknown): PunStatusType {
+  if (status === "visible" || status === "hidden" || status === "queued") {
+    return status;
+  }
+  return "queued";
 }
