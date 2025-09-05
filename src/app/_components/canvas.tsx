@@ -2,7 +2,8 @@
 
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import PunDetailDialog from "@/app/_components/pun-detail-dialog";
 import {
   computeNotePlacement,
   defaultNoteStyle,
@@ -19,6 +20,14 @@ import type { Id } from "../../../convex/_generated/dataModel";
 import type { PunStatusType } from "../../../convex/types/pun";
 
 type AnimalImagesType = FunctionReturnType<typeof api.animals.getAllAnimals>;
+type CanvasPun = {
+  firstRow?: string;
+  secondRow?: string;
+  likeCount?: number;
+  reportCount?: number;
+  animalId: Id<"animals">;
+  publicKey: string;
+};
 
 export default function Canvas(props: {
   puns: Preloaded<typeof api.puns.getRandomizedPuns>;
@@ -31,6 +40,7 @@ export default function Canvas(props: {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const [selected, setSelected] = useState<MovingAnimal | null>(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: taken care
   useEffect(() => {
@@ -75,6 +85,7 @@ export default function Canvas(props: {
       puns: puns.items,
       addedPun: highlightedPun,
     })) {
+      const w = word as unknown as CanvasPun;
       const animal = animalById.get(word.animalId);
 
       if (!animal) continue;
@@ -110,6 +121,7 @@ export default function Canvas(props: {
         : Math.random() * Math.max(1, logicalHeight - height);
 
       const moving: MovingAnimal = {
+        publicKey: w.publicKey,
         animal: {
           id: animal.id,
           image: animal.imageUrl,
@@ -117,9 +129,11 @@ export default function Canvas(props: {
           name: animal.name,
         },
         pun,
-        input1: word.firstRow,
-        input2: word.secondRow,
+        input1: w.firstRow || "",
+        input2: w.secondRow || "",
         status: toPunStatus(word.status),
+        likeCount: w.likeCount ?? 0,
+        reportCount: w.reportCount ?? 0,
         isHighlighted,
         x: initialX,
         y: initialY,
@@ -315,8 +329,41 @@ export default function Canvas(props: {
     function hitTest(x: number, y: number) {
       for (let i = movingAnimals.length - 1; i >= 0; i--) {
         const m = movingAnimals[i];
+        // Sprite rectangle
         if (x >= m.x && x <= m.x + m.width && y >= m.y && y <= m.y + m.height) {
           return m;
+        }
+        // Note rectangle (clamped the same way as in drawNote)
+        const placement = computeNotePlacement(
+          context,
+          canvas,
+          m,
+          defaultNoteStyle,
+        );
+        const {
+          boxWidth,
+          boxHeight,
+          desiredX,
+          desiredY,
+          margin,
+          logicalCanvasWidth,
+        } = placement;
+        if (boxWidth > 0 && boxHeight > 0) {
+          let boxX = desiredX;
+          let boxY = desiredY;
+          boxX = Math.max(
+            margin,
+            Math.min(boxX, logicalCanvasWidth - boxWidth - margin),
+          );
+          boxY = Math.max(0, boxY);
+          if (
+            x >= boxX &&
+            x <= boxX + boxWidth &&
+            y >= boxY &&
+            y <= boxY + boxHeight
+          ) {
+            return m;
+          }
         }
       }
       return undefined;
@@ -332,7 +379,7 @@ export default function Canvas(props: {
       const { x, y } = getCanvasPoint(evt);
       const hit = hitTest(x, y);
       if (hit) {
-        window.alert("clicked");
+        setSelected({ ...hit });
       }
     }
 
@@ -387,7 +434,18 @@ export default function Canvas(props: {
     };
   }, [props.puns]);
 
-  return <canvas ref={canvasRef} className="h-full w-full" />;
+  return (
+    <>
+      <canvas ref={canvasRef} className="h-full w-full" />
+      <PunDetailDialog
+        open={Boolean(selected)}
+        onOpenChange={(open: boolean) => {
+          if (!open) setSelected(null);
+        }}
+        moving={selected}
+      />
+    </>
+  );
 }
 
 function toOptimizedSrc(url: string, w: number, q = 75) {

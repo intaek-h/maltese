@@ -22,12 +22,15 @@ export type Word = {
 };
 
 export type MovingAnimal = {
+  publicKey?: string;
   animal: Animal;
   pun: string;
   input1?: string;
   input2?: string;
   // Status of the underlying pun (e.g., "visible" | "hidden" | "queued")
   status?: PunStatusType;
+  likeCount?: number;
+  reportCount?: number;
   // True if this sprite was added due to URL key highlight
   isHighlighted?: boolean;
   x: number;
