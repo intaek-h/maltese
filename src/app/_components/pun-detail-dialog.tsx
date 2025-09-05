@@ -3,14 +3,14 @@
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useCallback, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
+
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import LegoButton from "@/components/ui/lego-button";
 import {
   computeNotePlacement,
   defaultNoteStyle,
@@ -145,7 +145,11 @@ export default function PunDetailDialog(props: {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[380px] h-[520px]" showCloseButton={false}>
+      <DialogContent
+        className="w-[380px] h-[520px] bg-background/25 border-[#0000001a] border-2 shadow-2xl gap-8 rounded-[24px] p-8"
+        style={{ filter: `drop-shadow(2px 4px 6px #00000050)` }}
+        showCloseButton={false}
+      >
         <VisuallyHidden>
           <DialogHeader>
             <DialogTitle>
@@ -154,35 +158,21 @@ export default function PunDetailDialog(props: {
             <DialogDescription></DialogDescription>
           </DialogHeader>
         </VisuallyHidden>
+
         <div className="w-full">
           <canvas ref={previewCanvasRef} className="m-auto" />
+          <div className="text-center flex gap-1 items-center justify-center">
+            <span className="text-2xl ">⭐⭐⭐⭐⭐</span>
+            <span className="text-background italic text-sm">(+138)</span>
+          </div>
         </div>
+
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 text-sm">
-            <span>👍 {moving?.likeCount ?? 0}</span>
-            <span>🚩 {moving?.reportCount ?? 0}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => {
-                // TODO: wire like action using publicKey
-                onOpenChange(false);
-              }}
-            >
-              좋아요
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                // TODO: wire report action using publicKey
-                onOpenChange(false);
-              }}
-            >
-              신고
-            </Button>
-          </div>
+          <LegoButton variant="secondary" className="">
+            신고 🚩
+          </LegoButton>
+          <LegoButton className="flex-1">붐업+</LegoButton>
         </div>
-        <DialogFooter />
       </DialogContent>
     </Dialog>
   );
