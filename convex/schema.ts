@@ -35,13 +35,16 @@ export default defineSchema({
 
   likes: defineTable({
     punId: v.id("puns"),
-    voterKey: v.string(),
     ipHash: v.optional(v.string()),
-  }),
+    authorKey: v.string(),
+  })
+    .index("by_pun_author", ["punId", "authorKey"]) // uniqueness guard
+    .index("by_pun", ["punId"]) // fast count by pun
+    .index("by_author", ["authorKey"]), // fetch current user's likes
 
   reports: defineTable({
     punId: v.id("puns"),
-    reporterKey: v.string(),
     ipHash: v.optional(v.string()),
+    authorKey: v.string(),
   }),
 });

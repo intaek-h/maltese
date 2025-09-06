@@ -16,8 +16,8 @@ export const createReport = mutation({
 
     const reportId = await ctx.db.insert("reports", {
       punId: args.punId,
-      reporterKey: args.reporterKey,
       ipHash: args.ipHash,
+      authorKey: "",
     });
     return reportId;
   },

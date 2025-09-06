@@ -4,7 +4,8 @@ import { DialogDescription } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import Image from "next/image";
 import { useCallback, useEffect, useRef } from "react";
-
+import { useLocalStorage } from "react-use";
+import { useDebouncedCallback } from "use-debounce";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +13,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import LegoButton from "@/components/ui/lego-button";
+import { customToast } from "@/components/ui/lego-toast";
+import { LS } from "@/constants/local-storage";
 import {
   computeNotePlacement,
   defaultNoteStyle,
   drawScene,
 } from "@/lib/canvas/draw";
 import type { MovingAnimal } from "@/lib/canvas/types";
+import { likePunServerAction } from "@/lib/server-actions/likes/actions";
 
 export default function PunDetailDialog(props: {
   open: boolean;
@@ -26,6 +30,12 @@ export default function PunDetailDialog(props: {
   zoom?: number;
 }) {
   const { open, onOpenChange, moving, zoom: zoomProp } = props;
+
+  const [value, setValue] = useLocalStorage<string[]>(
+    LS.likeDisabledPunPublicKeys,
+    [],
+  );
+
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
 
@@ -144,6 +154,34 @@ export default function PunDetailDialog(props: {
     };
   }, [open, moving, computeScaledClone, zoomProp]);
 
+  const likePunDebounced = useDebouncedCallback(async (pubKey?: string) => {
+    try {
+      if (!pubKey) return;
+
+      const res = await likePunServerAction({
+        punPublicKey: pubKey,
+      });
+
+      customToast(
+        {
+          title: res.message,
+        },
+        { duration: 2000 },
+      );
+
+      const arr = value || [];
+      setValue([...arr, pubKey]);
+    } catch (error) {
+      console.error(error);
+      customToast(
+        {
+          title: "오류가 발생했습니다.",
+        },
+        { duration: 2000 },
+      );
+    }
+  }, 200);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -160,26 +198,26 @@ export default function PunDetailDialog(props: {
           </DialogHeader>
         </VisuallyHidden>
 
-        <div className="text-center flex gap-0.5 items-center justify-center">
-          <Image
-            src="/icons/pixel-coin-rotate.gif"
-            width={24}
-            height={24}
-            alt=""
-          />
-          <Image
-            src="/icons/pixel-coin-rotate.gif"
-            width={24}
-            height={24}
-            alt=""
-          />
-          <Image
-            src="/icons/pixel-coin-rotate.gif"
-            width={24}
-            height={24}
-            alt=""
-          />
-        </div>
+        {moving?.likeCount && moving.likeCount >= 5 ? (
+          <div
+            className="text-center flex gap-0.5 items-center justify-center"
+            aria-hidden
+          >
+            {Array.from({ length: Math.floor(moving.likeCount / 5) }).map(
+              (_, index) => (
+                <Image
+                  // biome-ignore lint/suspicious/noArrayIndexKey: then waht?
+                  key={index}
+                  src="/icons/pixel-coin-rotate.gif"
+                  width={24}
+                  height={24}
+                  alt=""
+                  unoptimized
+                />
+              ),
+            )}
+          </div>
+        ) : null}
         <div className="w-full">
           <canvas ref={previewCanvasRef} className="m-auto" />
         </div>
@@ -188,7 +226,13 @@ export default function PunDetailDialog(props: {
           <LegoButton variant="secondary" className="">
             신고 🚩
           </LegoButton>
-          <LegoButton className="flex-1">붐업+</LegoButton>
+          <LegoButton
+            disabled={value?.includes(moving?.publicKey || "")}
+            className="flex-1"
+            onClick={() => likePunDebounced(moving?.publicKey)}
+          >
+            붐업+
+          </LegoButton>
         </div>
       </DialogContent>
     </Dialog>

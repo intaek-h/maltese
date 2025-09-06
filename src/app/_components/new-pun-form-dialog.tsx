@@ -5,6 +5,7 @@ import { useAtom } from "jotai";
 import { ArrowLeftIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import NewPunForm from "@/app/_components/new-pun-form";
 import NewPunSavingDialog from "@/app/_components/new-pun-saving-dialog";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,41 @@ export default function NewPunFormDialog({
   const [isPending, startTransition] = useTransition();
 
   const [isSaving, setIsSaving] = useState(false);
+
+  const submitPun = useDebouncedCallback(async () => {
+    try {
+      setIsSaving(true);
+
+      const response = await createPunServerAction({
+        firstRow: row1,
+        secondRow: row2,
+        animalId: animal,
+      });
+
+      await new Promise<void>((r) => setTimeout(() => r(), 2000));
+
+      if (response.success) {
+        startTransition(() => {
+          onSubmit();
+          setRow1("");
+          setRow2("");
+          setAnimal("" as Id<"animals">);
+          router.push(`/?key=${response.data.publicKey}`);
+        });
+        return;
+      }
+
+      throw undefined;
+    } catch (error) {
+      if (error instanceof ConvexError) {
+        alert(error.data);
+        return;
+      }
+      alert("저장 중 오류가 발생했습니다.");
+    } finally {
+      setIsSaving(false);
+    }
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -106,44 +142,7 @@ export default function NewPunFormDialog({
                 <ArrowLeftIcon className="mr-2" />
                 뒤로
               </LegoButton>
-              <LegoButton
-                onClick={async () => {
-                  try {
-                    setIsSaving(true);
-
-                    const response = await createPunServerAction({
-                      firstRow: row1,
-                      secondRow: row2,
-                      animalId: animal,
-                    });
-
-                    await new Promise<void>((r) => setTimeout(() => r(), 2000));
-
-                    if (response.success) {
-                      startTransition(() => {
-                        onSubmit();
-                        setRow1("");
-                        setRow2("");
-                        setAnimal("" as Id<"animals">);
-                        router.push(`/?key=${response.data.publicKey}`);
-                      });
-                      return;
-                    }
-
-                    throw undefined;
-                  } catch (error) {
-                    if (error instanceof ConvexError) {
-                      alert(error.data);
-                      return;
-                    }
-                    alert("저장 중 오류가 발생했습니다.");
-                  } finally {
-                    setIsSaving(false);
-                  }
-                }}
-              >
-                저장하기
-              </LegoButton>
+              <LegoButton onClick={submitPun}>저장하기</LegoButton>
             </div>
           </div>
 

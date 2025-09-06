@@ -7,7 +7,7 @@ import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 
-const visiblePunsAggregate = new TableAggregate<{
+export const visiblePunsAggregate = new TableAggregate<{
   DataModel: DataModel;
   TableName: "puns";
   Key: null;
@@ -171,7 +171,7 @@ export const createPun = mutation({
 
     const pun = await ctx.db.get(punId);
 
-    if (pun) await visiblePunsAggregate.insert(ctx, pun);
+    if (pun) await visiblePunsAggregate.insert(ctx, pun); // TODO: 제거 해야함.
 
     return {
       publicKey,
