@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { koKR } from "@clerk/localizations";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import { JotaiProvider } from "@/components/providers/jotai-provider";
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`antialiased`}>
-        <ClerkProvider>
+        <ClerkProvider localization={koKR}>
           <ConvexClientProvider>
             <JotaiProvider>
               <Toaster

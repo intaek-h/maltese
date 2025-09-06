@@ -15,10 +15,53 @@ export const visiblePunsAggregate = new TableAggregate<{
   sortKey: () => null,
 });
 
-export const getAllPuns = query({
+export const getQueuedPuns = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("puns").collect();
+    return await ctx.db
+      .query("puns")
+      .withIndex("by_status", (q) => q.eq("status", "queued"))
+      .take(50);
+  },
+});
+
+export const changePunStatus = mutation({
+  args: {
+    punId: v.id("puns"),
+    status: v.union(
+      v.literal("visible"),
+      v.literal("hidden"),
+      v.literal("queued"),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.auth.getUserIdentity();
+    console.log("user: ", user);
+    if (!user) return { success: false };
+
+    const pun = await ctx.db.get(args.punId);
+    console.log("pun: ", pun);
+    if (!pun) return { success: false };
+
+    if (args.status === "hidden") {
+      await ctx.db.patch(args.punId, {
+        status: args.status,
+      });
+      await visiblePunsAggregate.deleteIfExists(ctx, pun);
+      return { success: true };
+    }
+
+    if (args.status === "visible") {
+      await ctx.db.patch(args.punId, {
+        status: args.status,
+      });
+      const updated = await ctx.db.get(args.punId);
+      if (updated) {
+        await visiblePunsAggregate.replaceOrInsert(ctx, pun, updated);
+      }
+    }
+
+    return { success: false };
   },
 });
 
