@@ -2,6 +2,7 @@
 
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import Image from "next/image";
 import { useCallback, useEffect, useRef } from "react";
 
 import {
@@ -146,7 +147,7 @@ export default function PunDetailDialog(props: {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-[380px] h-[520px] bg-background/25 border-[#0000001a] border-2 shadow-2xl gap-8 rounded-[24px] p-8"
+        className="w-[380px] h-[520px] bg-background/25 border-[#0000001a] border-2 shadow-2xl gap-4 rounded-[16px] p-8"
         style={{ filter: `drop-shadow(2px 4px 6px #00000050)` }}
         showCloseButton={false}
       >
@@ -159,15 +160,31 @@ export default function PunDetailDialog(props: {
           </DialogHeader>
         </VisuallyHidden>
 
+        <div className="text-center flex gap-0.5 items-center justify-center">
+          <Image
+            src="/icons/pixel-coin-rotate.gif"
+            width={24}
+            height={24}
+            alt=""
+          />
+          <Image
+            src="/icons/pixel-coin-rotate.gif"
+            width={24}
+            height={24}
+            alt=""
+          />
+          <Image
+            src="/icons/pixel-coin-rotate.gif"
+            width={24}
+            height={24}
+            alt=""
+          />
+        </div>
         <div className="w-full">
           <canvas ref={previewCanvasRef} className="m-auto" />
-          <div className="text-center flex gap-1 items-center justify-center">
-            <span className="text-2xl ">⭐⭐⭐⭐⭐</span>
-            <span className="text-background italic text-sm">(+138)</span>
-          </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 mt-auto">
           <LegoButton variant="secondary" className="">
             신고 🚩
           </LegoButton>
