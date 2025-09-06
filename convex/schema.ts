@@ -46,5 +46,8 @@ export default defineSchema({
     punId: v.id("puns"),
     ipHash: v.optional(v.string()),
     authorKey: v.string(),
-  }),
+  })
+    .index("by_pun_author", ["punId", "authorKey"]) // uniqueness guard
+    .index("by_pun", ["punId"]) // fast count by pun
+    .index("by_author", ["authorKey"]), // fetch current user's reports
 });

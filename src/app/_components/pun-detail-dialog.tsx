@@ -22,6 +22,7 @@ import {
 } from "@/lib/canvas/draw";
 import type { MovingAnimal } from "@/lib/canvas/types";
 import { likePunServerAction } from "@/lib/server-actions/likes/actions";
+import { reportPunServerAction } from "@/lib/server-actions/reports/actions";
 
 export default function PunDetailDialog(props: {
   open: boolean;
@@ -31,8 +32,12 @@ export default function PunDetailDialog(props: {
 }) {
   const { open, onOpenChange, moving, zoom: zoomProp } = props;
 
-  const [value, setValue] = useLocalStorage<string[]>(
+  const [likeDisabled, setLikeDisabled] = useLocalStorage<string[]>(
     LS.likeDisabledPunPublicKeys,
+    [],
+  );
+  const [reportDisabled, setReportDisabled] = useLocalStorage<string[]>(
+    LS.reportDisabledPunPublicKeys,
     [],
   );
 
@@ -169,8 +174,36 @@ export default function PunDetailDialog(props: {
         { duration: 2000 },
       );
 
-      const arr = value || [];
-      setValue([...arr, pubKey]);
+      const arr = likeDisabled || [];
+      setLikeDisabled([...arr, pubKey]);
+    } catch (error) {
+      console.error(error);
+      customToast(
+        {
+          title: "오류가 발생했습니다.",
+        },
+        { duration: 2000 },
+      );
+    }
+  }, 200);
+
+  const reportPunDebounced = useDebouncedCallback(async (pubKey?: string) => {
+    try {
+      if (!pubKey) return;
+
+      const res = await reportPunServerAction({
+        punPublicKey: pubKey,
+      });
+
+      customToast(
+        {
+          title: res.message,
+        },
+        { duration: 2000 },
+      );
+
+      const arr = reportDisabled || [];
+      setReportDisabled([...arr, pubKey]);
     } catch (error) {
       console.error(error);
       customToast(
@@ -223,11 +256,16 @@ export default function PunDetailDialog(props: {
         </div>
 
         <div className="flex items-center justify-between gap-4 mt-auto">
-          <LegoButton variant="secondary" className="">
+          <LegoButton
+            variant="secondary"
+            className=""
+            disabled={reportDisabled?.includes(moving?.publicKey || "")}
+            onClick={() => reportPunDebounced(moving?.publicKey)}
+          >
             신고 🚩
           </LegoButton>
           <LegoButton
-            disabled={value?.includes(moving?.publicKey || "")}
+            disabled={likeDisabled?.includes(moving?.publicKey || "")}
             className="flex-1"
             onClick={() => likePunDebounced(moving?.publicKey)}
           >
