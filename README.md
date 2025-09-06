@@ -7,19 +7,11 @@
 
 - [x] Strip HTML/JS on write and escape on render; normalize zero‑width and duplicate whitespace.
 
-- [ ] Update getAllPuns to:
-
-  - [ ] Return only status === "visible" and not soft-deleted.
-
-  - [ ] Paginate (cursor-based) using _creationTime; cap page size (e.g., 24).
-
-  - [ ] Return only fields needed by UI (avoid authorKey, ipHash).
-
 - [x] Add indexes you’ll actually query (verify in schema): by_public_key, by_status (and any by-animal you need).
 
-- [ ] Replace likes/reportCount client writes with server-calculated counts only.
+- [x] Replace likes/reportCount client writes with server-calculated counts only.
 
-- [ ] Add updatedAt maintenance in mutations (still useful alongside _creationTime for edits).
+- [x] Add updatedAt maintenance in mutations (still useful alongside _creationTime for edits).
 
 # Core features (backend)
 
@@ -35,20 +27,17 @@ Submission
 
 Likes
 
-- [ ] Table: likes(punId, voterKey, createdAt, ipHash?) with index by_pun_voter.
+- [x] Table: likes(punId, voterKey, createdAt, ipHash?) with index by_pun_voter.
 
-- [ ] likePun(punId, voterKey): upsert unique pair; increment likeCount on new insert.
+- [x] likePun(punId, voterKey): upsert unique pair; increment likeCount on new insert.
 
-- [ ] unlikePun(punId, voterKey): delete if exists; decrement likeCount.
 
 Reports
 
 
-- [ ] Table: reports(punId, reporterKey, reason?, createdAt, ipHash?) with index by_pun_reporter.
+- [x] Table: reports(punId, reporterKey, reason?, createdAt, ipHash?) with index by_pun_reporter.
 
-- [ ] reportPun(punId, reporterKey, reason?): insert once per reporter; increment reportCount.
-
-- [ ] Auto-hide: if distinct reports ≥ N within T minutes, set status: "hidden".
+- [x] reportPun(punId, reporterKey, reason?): insert once per reporter; increment reportCount.
 
 Moderation
 
@@ -58,7 +47,7 @@ Moderation
 
 Rate limiting and identity (no-auth)
 
-- [ ] Generate/store authorKey/voterKey in cookie/localStorage (UUID).
+- [x] Generate/store authorKey/voterKey in cookie/localStorage (UUID).
 
 - [x] Hash IP with rotating salt; store truncated hash only.
 
@@ -74,17 +63,11 @@ Rate limiting and identity (no-auth)
 
 Queries and pagination
 
-- [ ] listPuns({ animalId?, before?, limit }): filter by status, optional animalId, paginate by _creationTime.
-
-- [ ] getPunByPublicKey(publicKey): use by_public_key.
-
-- [ ] getLikesForPuns(punIds): batched counts or read likeCount on puns.
+- [x] getPunByPublicKey(publicKey): use by_public_key.
 
 Client integration
 
-- [ ] Update UI to use paginated listPuns and optimistic like/unlike with server reconciliation.
-
-- [ ] Prevent multiple like/report actions per item in UI based on current user’s state.
+- [x] Prevent multiple like/report actions per item in UI based on current user’s state.
 
 - [ ] Show hidden/queued states only in admin views.
 
@@ -106,7 +89,7 @@ Observability and ops
 
 Privacy and compliance
 
-- [ ] Store only hashed IPs; rotate salt on schedule.
+- [x] Store only hashed IPs; rotate salt on schedule.
 
 - [ ] Add a brief public note about abuse handling and content removal.
 
@@ -118,11 +101,5 @@ Optional hardening (phase 2)
 
 - [ ] CDN caching for read-only pun lists; stale-while-revalidate.
 
-Testing
 
-- [ ] Unit tests for validators, dedupe, rate limits.
-
-- [ ] Integration tests for like/report idempotency.
-
-- [ ] Load test read endpoints and submission/like bursts.
 
