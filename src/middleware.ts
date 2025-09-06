@@ -1,12 +1,10 @@
-import type { NextRequest } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { COOKIES } from "./constants/cookies";
 
-export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
-};
+const isProtectedRoute = createRouteMatcher(["/minad(.*)"]); // /minad = /admin
 
-export function middleware(req: NextRequest) {
+export default clerkMiddleware(async (auth, req) => {
   const res = NextResponse.next();
 
   const authorKeyCookie = req.cookies.get(COOKIES.authorKey)?.value;
@@ -33,5 +31,7 @@ export function middleware(req: NextRequest) {
     });
   }
 
+  if (isProtectedRoute(req)) await auth.protect();
+
   return res;
-}
+});
