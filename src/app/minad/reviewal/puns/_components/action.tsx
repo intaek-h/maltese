@@ -1,12 +1,14 @@
 "use client";
 
-import { fetchMutation } from "convex/nextjs";
+import { useMutation } from "convex/react";
 import { Button } from "@/components/ui/button";
 import { api } from "../../../../../../convex/_generated/api";
 import type { Id } from "../../../../../../convex/_generated/dataModel";
 import type { PunStatusType } from "../../../../../../convex/types/pun";
 
 export function Action({ id }: { id: Id<"puns"> }) {
+  const mutate = useMutation(api.puns.changePunStatus);
+
   async function changePunStatus({
     punId,
     status,
@@ -14,7 +16,7 @@ export function Action({ id }: { id: Id<"puns"> }) {
     status: PunStatusType;
     punId: Id<"puns">;
   }) {
-    const res = await fetchMutation(api.puns.changePunStatus, {
+    const res = await mutate({
       punId,
       status,
     });

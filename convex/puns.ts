@@ -18,6 +18,10 @@ export const visiblePunsAggregate = new TableAggregate<{
 export const getQueuedPuns = query({
   args: {},
   handler: async (ctx) => {
+    const user = await ctx.auth.getUserIdentity();
+
+    if (!user) return null;
+
     return await ctx.db
       .query("puns")
       .withIndex("by_status", (q) => q.eq("status", "queued"))
@@ -36,11 +40,11 @@ export const changePunStatus = mutation({
   },
   handler: async (ctx, args) => {
     const user = await ctx.auth.getUserIdentity();
-    console.log("user: ", user);
+
     if (!user) return { success: false };
 
     const pun = await ctx.db.get(args.punId);
-    console.log("pun: ", pun);
+
     if (!pun) return { success: false };
 
     if (args.status === "hidden") {
@@ -59,6 +63,7 @@ export const changePunStatus = mutation({
       if (updated) {
         await visiblePunsAggregate.replaceOrInsert(ctx, pun, updated);
       }
+      return { success: true };
     }
 
     return { success: false };

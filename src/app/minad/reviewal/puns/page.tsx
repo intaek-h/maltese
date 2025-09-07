@@ -1,5 +1,6 @@
-import { fetchQuery } from "convex/nextjs";
+"use client";
 
+import { useQuery } from "convex/react";
 import {
   Table,
   TableBody,
@@ -9,11 +10,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "../../../../../convex/_generated/api";
-
 import { Action } from "./_components/action";
 
-export default async function Page() {
-  const puns = await fetchQuery(api.puns.getQueuedPuns);
+export default function Page() {
+  const puns = useQuery(api.puns.getQueuedPuns);
 
   return (
     <div>
@@ -45,7 +45,7 @@ export default async function Page() {
           </TableHeader>
 
           <TableBody>
-            {puns.map((p) => (
+            {puns?.map((p) => (
               <TableRow key={p._id}>
                 <TableCell className="font-medium border-r">
                   {p.firstRow}
