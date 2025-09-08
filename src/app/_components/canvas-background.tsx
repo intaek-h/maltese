@@ -3,7 +3,7 @@
 import type { FunctionReturnType } from "convex/server";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
-import { useEffect, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { customToast } from "@/components/ui/lego-toast";
 import { shouldShowPunLoader as shouldShowPunLoaderAtom } from "@/store/pun";
@@ -21,6 +21,12 @@ export function CanvasBackground({
   const [_, setShouldShowPunLoader] = useAtom(shouldShowPunLoaderAtom);
 
   const [isPending, startTransition] = useTransition();
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isPending) {
@@ -69,7 +75,7 @@ export function CanvasBackground({
         backgroundImage: `url(/backgrounds/2.jpg)`,
       }}
     >
-      {children}
+      {isMounted ? children : null}
     </div>
   );
 }

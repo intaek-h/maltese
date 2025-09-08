@@ -42,6 +42,45 @@ export const defaultNoteStyle: NoteStyle = {
   dividerWidth: 3,
 };
 
+// Like bar via image assets (fixed size). Loaded once and reused.
+const BAR_GAP = 6;
+const FALLBACK_BAR_HEIGHT = 18;
+
+type BarAssetKey = "min" | "half" | "almost" | "full";
+const barAssets: Record<
+  BarAssetKey,
+  { img: HTMLImageElement; loaded: boolean }
+> = {
+  min: { img: new Image(), loaded: false },
+  half: { img: new Image(), loaded: false },
+  almost: { img: new Image(), loaded: false },
+  full: { img: new Image(), loaded: false },
+};
+
+barAssets.min.img.src = "/health-bars/bar-min.png";
+barAssets.half.img.src = "/health-bars/bar-half.png";
+barAssets.almost.img.src = "/health-bars/bar-almost-full.png";
+barAssets.full.img.src = "/health-bars/bar-full.png";
+
+for (const key of Object.keys(barAssets) as Array<BarAssetKey>) {
+  const entry = barAssets[key];
+  entry.img.decoding = "async";
+  entry.img.onload = () => {
+    entry.loaded = true;
+  };
+}
+
+function selectBarAsset(likeCount: number | undefined): {
+  img: HTMLImageElement;
+  loaded: boolean;
+} {
+  const n = typeof likeCount === "number" ? likeCount : 0;
+  if (n < 1) return barAssets.min;
+  if (n < 10) return barAssets.half;
+  if (n < 20) return barAssets.almost;
+  return barAssets.full;
+}
+
 // Compute the note box placement for a given moving sprite without drawing.
 // This returns desired (unclamped) X/Y for the box when placed above the sprite.
 export function computeNotePlacement(
@@ -350,6 +389,7 @@ export function drawScene(
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
   movingAnimals: ReadonlyArray<MovingAnimal>,
+  options?: { likeBarSizeAdjustPx?: number },
 ) {
   const transform = ctx.getTransform();
   const scaleX = transform.a || 1;
@@ -375,9 +415,17 @@ export function drawScene(
     // Draw note with input_1 and input_2
     drawNote(ctx, canvas, moving, defaultNoteStyle);
 
-    // Draw status badge for highlighted pun
+    // Draw like bar via image under the sprite
+    const likeBarHeight = drawLikeBar(
+      ctx,
+      canvas,
+      moving,
+      options?.likeBarSizeAdjustPx ?? 0,
+    );
+
+    // Draw status badge for highlighted pun, positioned below the like bar
     if (moving.isHighlighted) {
-      drawStatusBadge(ctx, canvas, moving);
+      drawStatusBadge(ctx, canvas, moving, likeBarHeight);
     }
 
     if ((moving.highlightRemainingMs ?? 0) > 0) {
@@ -397,6 +445,7 @@ function drawStatusBadge(
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
   moving: MovingAnimal,
+  extraOffsetBelow: number = 0,
 ) {
   const status = moving.status || "queued";
   const label =
@@ -435,7 +484,7 @@ function drawStatusBadge(
 
   const centerX = moving.x + moving.width / 2;
   let boxX = Math.round(centerX - boxWidth / 2);
-  let boxY = Math.round(moving.y + moving.height + gap);
+  let boxY = Math.round(moving.y + moving.height + gap + extraOffsetBelow);
 
   const t = ctx.getTransform();
   const logicalCanvasWidth = canvas.width / (t.a || 1);
@@ -468,4 +517,54 @@ function drawStatusBadge(
   const textY = boxY + boxHeight / 2;
   ctx.fillText(label, textX, textY);
   ctx.restore();
+}
+
+function drawLikeBar(
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  moving: MovingAnimal,
+  sizeAdjustPx: number = 0,
+): number {
+  const t = ctx.getTransform();
+  const logicalCanvasWidth = canvas.width / (t.a || 1);
+  const logicalCanvasHeight = canvas.height / (t.d || 1);
+  const margin = 4;
+
+  const centerX = moving.x + moving.width / 2;
+  // Prefer image asset if loaded
+  const asset = selectBarAsset(moving.likeCount);
+  const img = asset.img;
+  if (asset.loaded && img.naturalWidth > 0 && img.naturalHeight > 0) {
+    const drawWidth = Math.max(1, img.naturalWidth + sizeAdjustPx);
+    const aspect = img.naturalHeight / img.naturalWidth;
+    const drawHeight = Math.max(1, Math.round(drawWidth * aspect));
+
+    let barX = Math.round(centerX - drawWidth / 2);
+    let barY = Math.round(moving.y + moving.height + BAR_GAP);
+
+    // Clamp fully within canvas
+    barX = Math.max(
+      margin,
+      Math.min(barX, logicalCanvasWidth - drawWidth - margin),
+    );
+    if (barY + drawHeight > logicalCanvasHeight - margin) {
+      barY = logicalCanvasHeight - margin - drawHeight;
+    }
+
+    ctx.drawImage(img, barX, barY, drawWidth, drawHeight);
+
+    return BAR_GAP + drawHeight;
+  }
+  // If image not yet loaded, reserve fallback space
+  return BAR_GAP + FALLBACK_BAR_HEIGHT;
+}
+
+// Measure the vertical space the like bar will occupy beneath a sprite.
+// Used by layouts (e.g., detail dialog) to reserve space.
+export function measureLikeBarUsedHeight(moving: MovingAnimal): number {
+  const asset = selectBarAsset(moving.likeCount);
+  if (asset.loaded && asset.img.naturalHeight > 0) {
+    return BAR_GAP + asset.img.naturalHeight;
+  }
+  return BAR_GAP + FALLBACK_BAR_HEIGHT;
 }

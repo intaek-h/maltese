@@ -20,6 +20,7 @@ import {
   computeNotePlacement,
   defaultNoteStyle,
   drawScene,
+  measureLikeBarUsedHeight,
 } from "@/lib/canvas/draw";
 import type { MovingAnimal } from "@/lib/canvas/types";
 import { likePunServerAction } from "@/lib/server-actions/likes/actions";
@@ -103,7 +104,7 @@ export default function PunDetailDialog(props: {
       const zoom = typeof zoomProp === "number" ? zoomProp : 0.8;
       let clone = computeScaledClone(current, cssWidth, cssHeight, zoom);
 
-      // Measure note to center the union (note above + sprite)
+      // Measure note to center the union (note above + sprite + like bar below)
       const unionPaddingY = 14; // vertical safety margin to avoid shadow cropping
       let centeredX = Math.round((cssWidth - clone.width) / 2);
       let tempForMeasure: MovingAnimal = { ...clone, x: centeredX, y: 0 };
@@ -115,7 +116,8 @@ export default function PunDetailDialog(props: {
       );
       const extraAboveBase =
         defaultNoteStyle.gap + defaultNoteStyle.arrowSize + placement.boxHeight;
-      let unionHeight = extraAboveBase + clone.height;
+      const likeBarBelowHeight = measureLikeBarUsedHeight(clone);
+      let unionHeight = extraAboveBase + clone.height + likeBarBelowHeight;
 
       // If the union exceeds available height minus padding, reduce scale proportionally
       const maxUnionHeight = cssHeight - unionPaddingY * 2;
@@ -132,7 +134,7 @@ export default function PunDetailDialog(props: {
           tempForMeasure,
           defaultNoteStyle,
         );
-        unionHeight = extraAboveBase + clone.height;
+        unionHeight = extraAboveBase + clone.height + likeBarBelowHeight;
       }
 
       // Final center with vertical padding applied
@@ -236,6 +238,7 @@ export default function PunDetailDialog(props: {
           <div className="flex justify-end items-center">
             <div>
               <button
+                tabIndex={-1}
                 disabled={reportDisabled?.includes(moving?.publicKey || "")}
                 onClick={() => reportPunDebounced(moving?.publicKey)}
                 className="text-muted text-sm inline-flex items-center gap-1 hover:underline hover:opacity-70 active:opacity-50 underline-offset-2 disabled:invisible"

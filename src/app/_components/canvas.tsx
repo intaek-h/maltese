@@ -271,7 +271,8 @@ export default function Canvas(props: {
     }
 
     function draw() {
-      drawScene(context, canvas, movingAnimals);
+      // Slightly shrink like bars on the main canvas for better balance
+      drawScene(context, canvas, movingAnimals, { likeBarSizeAdjustPx: -30 });
     }
 
     function loop(timestampMs: number) {
