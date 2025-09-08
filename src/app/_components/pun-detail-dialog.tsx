@@ -2,6 +2,7 @@
 
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Info } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef } from "react";
 import { useLocalStorage } from "react-use";
@@ -185,7 +186,7 @@ export default function PunDetailDialog(props: {
         { duration: 2000 },
       );
     }
-  }, 200);
+  }, 100);
 
   const reportPunDebounced = useDebouncedCallback(async (pubKey?: string) => {
     try {
@@ -213,7 +214,7 @@ export default function PunDetailDialog(props: {
         { duration: 2000 },
       );
     }
-  }, 200);
+  }, 100);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -231,46 +232,58 @@ export default function PunDetailDialog(props: {
           </DialogHeader>
         </VisuallyHidden>
 
-        {moving?.likeCount && moving.likeCount >= 5 ? (
-          <div
-            className="text-center flex gap-0.5 items-center justify-center"
-            aria-hidden
-          >
-            {Array.from({ length: Math.floor(moving.likeCount / 5) }).map(
-              (_, index) => (
-                <Image
-                  // biome-ignore lint/suspicious/noArrayIndexKey: then waht?
-                  key={index}
-                  src="/icons/pixel-coin-rotate.gif"
-                  width={24}
-                  height={24}
-                  alt=""
-                  unoptimized
-                />
-              ),
-            )}
+        <div className="flex flex-col gap-4">
+          <div className="flex justify-end items-center">
+            <div>
+              <button
+                disabled={reportDisabled?.includes(moving?.publicKey || "")}
+                onClick={() => reportPunDebounced(moving?.publicKey)}
+                className="text-muted text-sm inline-flex items-center gap-1 hover:underline hover:opacity-70 active:opacity-50 underline-offset-2 disabled:invisible"
+                type="button"
+              >
+                <span>신고하기</span>
+                <Info className="size-3" />
+              </button>
+            </div>
           </div>
-        ) : null}
-        <div className="w-full">
-          <canvas ref={previewCanvasRef} className="m-auto" />
-        </div>
 
-        <div className="flex items-center justify-between gap-4 mt-auto">
-          <LegoButton
-            variant="secondary"
-            className=""
-            disabled={reportDisabled?.includes(moving?.publicKey || "")}
-            onClick={() => reportPunDebounced(moving?.publicKey)}
-          >
-            신고 🚩
-          </LegoButton>
-          <LegoButton
-            disabled={likeDisabled?.includes(moving?.publicKey || "")}
-            className="flex-1"
-            onClick={() => likePunDebounced(moving?.publicKey)}
-          >
-            붐업+
-          </LegoButton>
+          {moving?.likeCount && moving.likeCount >= 5 ? (
+            <div
+              className="text-center flex gap-0.5 items-center justify-center"
+              aria-hidden
+            >
+              {Array.from({ length: Math.floor(moving.likeCount / 5) }).map(
+                (_, index) => (
+                  <Image
+                    // biome-ignore lint/suspicious/noArrayIndexKey: then waht?
+                    key={index}
+                    src="/icons/pixel-coin-rotate.gif"
+                    width={24}
+                    height={24}
+                    alt=""
+                    unoptimized
+                  />
+                ),
+              )}
+            </div>
+          ) : null}
+
+          <div className="w-full">
+            <canvas ref={previewCanvasRef} className="m-auto" />
+          </div>
+
+          <div className="flex items-center justify-between gap-4 mt-auto">
+            <LegoButton variant="secondary" onClick={() => onOpenChange(false)}>
+              닫기
+            </LegoButton>
+            <LegoButton
+              disabled={likeDisabled?.includes(moving?.publicKey || "")}
+              className="flex-1"
+              onClick={() => likePunDebounced(moving?.publicKey)}
+            >
+              붐업+
+            </LegoButton>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
