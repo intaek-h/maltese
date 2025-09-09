@@ -478,10 +478,14 @@ function mergePuns({
   if (!addedPun) {
     return puns;
   }
-  if (puns.map((p) => p.publicKey).includes(addedPun.publicKey)) {
-    return puns;
+  if (addedPun) {
+    return [addedPun];
   }
-  return puns.concat(addedPun);
+  // if (puns.map((p) => p.publicKey).includes(addedPun.publicKey)) {
+  //   return puns;
+  // }
+  // return puns.concat(addedPun);
+  return puns;
 }
 
 function toPunStatus(status: unknown): PunStatusType {
