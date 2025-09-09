@@ -4,9 +4,10 @@ import { DialogDescription } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Info } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "react-use";
 import { useDebouncedCallback } from "use-debounce";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,11 @@ import {
 } from "@/components/ui/dialog";
 import LegoButton from "@/components/ui/lego-button";
 import { customToast } from "@/components/ui/lego-toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { LS } from "@/constants/local-storage";
 import {
   computeNotePlacement,
@@ -42,6 +48,9 @@ export default function PunDetailDialog(props: {
     LS.reportDisabledPunPublicKeys,
     [],
   );
+
+  const [shouldShowBoomUpTooltip, setShouldShowBoomUpTooltip] =
+    useLocalStorage<boolean>(LS.shouldShowBoomUpTooltip, true);
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -162,6 +171,7 @@ export default function PunDetailDialog(props: {
     };
   }, [open, moving, computeScaledClone, zoomProp]);
 
+  const [isLikePunPending, setIsLikePunPending] = useState(false);
   const likePunDebounced = useDebouncedCallback(async (pubKey?: string) => {
     try {
       if (!pubKey) return;
@@ -187,9 +197,12 @@ export default function PunDetailDialog(props: {
         },
         { duration: 2000 },
       );
+    } finally {
+      setIsLikePunPending(false);
     }
   }, 100);
 
+  const [isReportPunPending, setIsReportPunPending] = useState(false);
   const reportPunDebounced = useDebouncedCallback(async (pubKey?: string) => {
     try {
       if (!pubKey) return;
@@ -215,6 +228,8 @@ export default function PunDetailDialog(props: {
         },
         { duration: 2000 },
       );
+    } finally {
+      setIsReportPunPending(false);
     }
   }, 100);
 
@@ -237,16 +252,21 @@ export default function PunDetailDialog(props: {
         <div className="flex flex-col gap-4">
           <div className="flex justify-end items-center">
             <div>
-              <button
+              <Button
+                variant="inline"
+                size="sm"
+                loading={isReportPunPending}
+                className="text-background!"
                 tabIndex={-1}
                 disabled={reportDisabled?.includes(moving?.publicKey || "")}
-                onClick={() => reportPunDebounced(moving?.publicKey)}
-                className="text-muted text-sm inline-flex items-center gap-1 hover:underline hover:opacity-70 active:opacity-50 underline-offset-2 disabled:invisible"
-                type="button"
+                onClick={() => {
+                  setIsReportPunPending(true);
+                  reportPunDebounced(moving?.publicKey);
+                }}
               >
-                <span>신고하기</span>
+                신고하기
                 <Info className="size-3" />
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -279,13 +299,26 @@ export default function PunDetailDialog(props: {
             <LegoButton variant="secondary" onClick={() => onOpenChange(false)}>
               닫기
             </LegoButton>
-            <LegoButton
-              disabled={likeDisabled?.includes(moving?.publicKey || "")}
-              className="flex-1"
-              onClick={() => likePunDebounced(moving?.publicKey)}
-            >
-              붐업+
-            </LegoButton>
+
+            <Tooltip open={shouldShowBoomUpTooltip}>
+              <TooltipTrigger asChild>
+                <LegoButton
+                  className="flex-1"
+                  loading={isLikePunPending}
+                  disabled={likeDisabled?.includes(moving?.publicKey || "")}
+                  onClick={() => {
+                    setIsLikePunPending(true);
+                    setShouldShowBoomUpTooltip(false);
+                    likePunDebounced(moving?.publicKey);
+                  }}
+                >
+                  붐업+
+                </LegoButton>
+              </TooltipTrigger>
+              <TooltipContent className="animate-bounce!">
+                붐업이 많을수록 체력이 높아져요!
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </DialogContent>

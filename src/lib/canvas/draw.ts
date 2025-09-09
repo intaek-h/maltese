@@ -1,3 +1,8 @@
+import BarAlmost from "@public/health-bars/bar-almost-full.png";
+import BarFull from "@public/health-bars/bar-full.png";
+import BarHalf from "@public/health-bars/bar-half.png";
+import BarMin from "@public/health-bars/bar-min.png";
+import type { StaticImageData } from "next/image";
 import type { MovingAnimal } from "./types";
 
 type NoteStyle = {
@@ -57,18 +62,37 @@ const barAssets: Record<
   full: { img: new Image(), loaded: false },
 };
 
-barAssets.min.img.src = "/health-bars/bar-min.png";
-barAssets.half.img.src = "/health-bars/bar-half.png";
-barAssets.almost.img.src = "/health-bars/bar-almost-full.png";
-barAssets.full.img.src = "/health-bars/bar-full.png";
+function getImageSrc(asset: string | StaticImageData): string {
+  return typeof asset === "string" ? asset : asset.src;
+}
 
-for (const key of Object.keys(barAssets) as Array<BarAssetKey>) {
-  const entry = barAssets[key];
-  entry.img.decoding = "async";
-  entry.img.onload = () => {
+function prepareImage(
+  entry: { img: HTMLImageElement; loaded: boolean },
+  asset: string | StaticImageData,
+) {
+  const img = entry.img;
+  // Set CORS mode before setting src to avoid tainting the canvas
+  img.crossOrigin = "anonymous";
+  img.decoding = "async";
+  img.src = getImageSrc(asset);
+  const markLoaded = () => {
     entry.loaded = true;
   };
+  // Prefer decode() for smoother rendering; fall back to onload/onerror
+  if (typeof img.decode === "function") {
+    img.decode().then(markLoaded).catch(markLoaded);
+  } else {
+    img.onload = markLoaded;
+    img.onerror = markLoaded;
+  }
 }
+
+prepareImage(barAssets.min, BarMin);
+prepareImage(barAssets.half, BarHalf);
+prepareImage(barAssets.almost, BarAlmost);
+prepareImage(barAssets.full, BarFull);
+
+// Images are prepared above; nothing else to do here.
 
 function selectBarAsset(likeCount: number | undefined): {
   img: HTMLImageElement;

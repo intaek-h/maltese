@@ -4,6 +4,7 @@
 
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2Icon } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -18,6 +19,9 @@ const legoButtonVariants = cva(
         secondary:
           "bg-white text-black before:bg-white before:shadow-[0_-4px_rgb(220_220_220_/_80%)_inset,0_4px_rgb(255_255_255_/_99%)_inset,-4px_0_rgb(255_255_255_/_80%)_inset,4px_0_rgb(220_220_220_/_80%)_inset] hover:before:shadow-[0_-4px_rgb(0_0_0_/_20%)_inset,0_4px_rgb(255_255_255_/_80%)_inset,-4px_0_rgb(255_255_255_/_80%)_inset,4px_0_rgb(0_0_0_/_20%)_inset] disabled:bg-neutral-200 disabled:text-neutral-500 disabled:before:bg-neutral-200 disabled:before:shadow-[0_-4px_rgb(180_180_180_/_60%)_inset,0_4px_rgb(255_255_255_/_80%)_inset,-4px_0_rgb(230_230_230_/_60%)_inset,4px_0_rgb(180_180_180_/_60%)_inset] disabled:after:shadow-[0_4px_0_0_rgb(0_0_0_/_8%)] aria-disabled:bg-neutral-200 aria-disabled:text-neutral-500 aria-disabled:before:bg-neutral-200 aria-disabled:before:shadow-[0_-4px_rgb(180_180_180_/_60%)_inset,0_4px_rgb(255_255_255_/_80%)_inset,-4px_0_rgb(230_230_230_/_60%)_inset,4px_0_rgb(180_180_180_/_60%)_inset] aria-disabled:after:shadow-[0_4px_0_0_rgb(0_0_0_/_8%)]",
       },
+      loading: {
+        true: "",
+      },
     },
     defaultVariants: {
       variant: "primary",
@@ -30,20 +34,31 @@ export default function LegoButton({
   variant,
   asChild = false,
   style,
+  loading = false,
+  disabled,
   children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof legoButtonVariants> & {
     asChild?: boolean;
+    loading?: boolean;
   }) {
   const Comp = asChild ? Slot : "button";
 
   return (
     <Comp
-      className={cn(legoButtonVariants({ variant, className }))}
+      className={cn(legoButtonVariants({ variant, className, loading }))}
+      disabled={disabled || loading}
       style={{ whiteSpace: "unset", ...(style ?? {}) }}
       {...props}
     >
+      {loading && (
+        <Loader2Icon
+          className={
+            "text-muted-foreground absolute animate-spin invert loading"
+          }
+        />
+      )}
       {children}
     </Comp>
   );
