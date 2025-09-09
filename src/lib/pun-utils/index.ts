@@ -13,5 +13,5 @@ export function formatPun(
   input1: string | undefined,
   input2: string | undefined,
 ) {
-  return `${input1} ${input2}`.trim();
+  return `${input1 || ''} ${input2 || ''}`.trim();
 }
