@@ -291,8 +291,9 @@ export default function PunDetailDialog(props: {
                   try {
                     setIsOpeningShareApi(true);
                     await window.navigator.share({
-                      title: formatPun(moving?.input1, moving?.input2),
-                      url: process.env.NEXT_PUBLIC_URL,
+                      title: "말장난 말티즈",
+                      text: formatPun(moving?.input1, moving?.input2),
+                      url: `${process.env.NEXT_PUBLIC_URL || ""}?key=${moving?.publicKey}`,
                     });
                   } catch (error) {
                     console.error(error);
