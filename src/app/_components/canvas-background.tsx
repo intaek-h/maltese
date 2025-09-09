@@ -46,7 +46,10 @@ export function CanvasBackground({
     const timerId_2 = setTimeout(() => {
       customToast({
         title: "⭐ 미리보기 화면입니다.",
-        description: "제출하신 말장난은 검수가 끝난 뒤 등록됩니다.",
+        description:
+          highlightedPun.status === "queued"
+            ? "제출하신 말장난은 검수가 끝난 뒤 등록됩니다."
+            : "",
         button: {
           label: "미리보기 종료",
           onClick: async () => {

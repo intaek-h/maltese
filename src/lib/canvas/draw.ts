@@ -592,3 +592,13 @@ export function measureLikeBarUsedHeight(moving: MovingAnimal): number {
   }
   return BAR_GAP + FALLBACK_BAR_HEIGHT;
 }
+
+// Measure the vertical space the status badge will occupy beneath the like bar.
+// Only applies to highlighted sprites where the badge is drawn.
+export function measureStatusBadgeUsedHeight(moving: MovingAnimal): number {
+  if (!moving.isHighlighted) return 0;
+  // Keep in sync with drawStatusBadge constants
+  const BADGE_GAP_BELOW_SPRITE = 6; // same as `gap` in drawStatusBadge
+  const BADGE_BOX_HEIGHT = 18; // same computed height in drawStatusBadge
+  return BADGE_GAP_BELOW_SPRITE + BADGE_BOX_HEIGHT;
+}

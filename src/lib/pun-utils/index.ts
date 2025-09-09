@@ -8,3 +8,10 @@ export function shuffle<T>(array: T[], rand: Rand): T[] {
   }
   return array;
 }
+
+export function formatPun(
+  input1: string | undefined,
+  input2: string | undefined,
+) {
+  return `${input1} ${input2}`.trim();
+}

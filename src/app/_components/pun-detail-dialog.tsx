@@ -2,7 +2,7 @@
 
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { Info } from "lucide-react";
+import { Info, Link, Share } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "react-use";
@@ -27,8 +27,11 @@ import {
   defaultNoteStyle,
   drawScene,
   measureLikeBarUsedHeight,
+  measureStatusBadgeUsedHeight,
 } from "@/lib/canvas/draw";
 import type { MovingAnimal } from "@/lib/canvas/types";
+import { copyTextToClipboard } from "@/lib/clipboard-utils";
+import { formatPun } from "@/lib/pun-utils";
 import { likePunServerAction } from "@/lib/server-actions/likes/actions";
 import { reportPunServerAction } from "@/lib/server-actions/reports/actions";
 
@@ -54,6 +57,8 @@ export default function PunDetailDialog(props: {
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
+
+  const [isOpeningShareApi, setIsOpeningShareApi] = useState(false);
 
   const computeScaledClone = useCallback(
     (
@@ -126,7 +131,14 @@ export default function PunDetailDialog(props: {
       const extraAboveBase =
         defaultNoteStyle.gap + defaultNoteStyle.arrowSize + placement.boxHeight;
       const likeBarBelowHeight = measureLikeBarUsedHeight(clone);
-      let unionHeight = extraAboveBase + clone.height + likeBarBelowHeight;
+      const statusBadgeBelowHeight = clone.isHighlighted
+        ? measureStatusBadgeUsedHeight(clone)
+        : 0;
+      let unionHeight =
+        extraAboveBase +
+        clone.height +
+        likeBarBelowHeight +
+        statusBadgeBelowHeight;
 
       // If the union exceeds available height minus padding, reduce scale proportionally
       const maxUnionHeight = cssHeight - unionPaddingY * 2;
@@ -143,7 +155,11 @@ export default function PunDetailDialog(props: {
           tempForMeasure,
           defaultNoteStyle,
         );
-        unionHeight = extraAboveBase + clone.height + likeBarBelowHeight;
+        unionHeight =
+          extraAboveBase +
+          clone.height +
+          likeBarBelowHeight +
+          (clone.isHighlighted ? measureStatusBadgeUsedHeight(clone) : 0);
       }
 
       // Final center with vertical padding applied
@@ -250,7 +266,46 @@ export default function PunDetailDialog(props: {
         </VisuallyHidden>
 
         <div className="flex flex-col gap-4">
-          <div className="flex justify-end items-center">
+          <div className="flex justify-between items-center">
+            <div>
+              <Button
+                size="sm"
+                variant="inline"
+                className="text-background! hidden! sm:inline-flex!"
+                onClick={async () => {
+                  copyTextToClipboard(
+                    `${process.env.NEXT_PUBLIC_URL || ""}?key=${moving?.publicKey}`,
+                  );
+                  alert("링크를 복사했습니다.");
+                }}
+              >
+                공유하기
+                <Link className="size-3" />
+              </Button>
+
+              <Button
+                variant="inline"
+                className="text-background! inline-flex! sm:hidden!"
+                loading={isOpeningShareApi}
+                onClick={async () => {
+                  try {
+                    setIsOpeningShareApi(true);
+                    await window.navigator.share({
+                      title: formatPun(moving?.input1, moving?.input2),
+                      url: process.env.NEXT_PUBLIC_URL,
+                    });
+                  } catch (error) {
+                    console.error(error);
+                  } finally {
+                    setIsOpeningShareApi(false);
+                  }
+                }}
+              >
+                공유하기
+                <Share className="size-3" />
+              </Button>
+            </div>
+
             <div>
               <Button
                 variant="inline"
