@@ -2,6 +2,7 @@ import { TableAggregate } from "@convex-dev/aggregate";
 import { ConvexError, v } from "convex/values";
 import Rand from "rand-seed";
 import { v4 as uuidv4 } from "uuid";
+import { UUIDv4 } from "uuid-v4-validator";
 import { shuffle } from "../src/lib/pun-utils";
 import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
@@ -140,16 +141,14 @@ export const getPunByPubKey = query({
   args: {
     publicKey: v.string(),
   },
-  // throw 하면 preloadQuery 에서 에러 핸들링할 방법이 없음. 그냥 null 리턴으로 쉽게 가자.
   handler: async (ctx, args) => {
-    // TODO
-    // const isValidUUID = validateUUID(args.publicKey);
-
-    // if (!isValidUUID) {
-    //   throw new ConvexError("유효한 키가 아닙니다.");
-    // }
-
     if (!args.publicKey) {
+      return null;
+    }
+
+    const isUUID = UUIDv4.validate(args.publicKey);
+
+    if (!isUUID) {
       return null;
     }
 
