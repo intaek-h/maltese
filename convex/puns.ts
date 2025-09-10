@@ -216,10 +216,6 @@ export const createPun = mutation({
       updatedAt: 0,
     });
 
-    const pun = await ctx.db.get(punId);
-
-    if (pun) await visiblePunsAggregate.insert(ctx, pun); // TODO: 제거 해야함.
-
     return {
       publicKey,
       firstRow: args.firstRow || undefined,
