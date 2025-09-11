@@ -251,7 +251,7 @@ export default function PunDetailDialog(props: {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-[380px] h-[520px] bg-background/25 border-[#0000001a] border-2 shadow-2xl gap-4 rounded-[16px] p-8"
+        className="w-[380px] h-[560px] bg-background/25 border-[#0000001a] border-2 shadow-2xl gap-4 rounded-[16px] p-8"
         style={{ filter: `drop-shadow(2px 4px 6px #00000050)` }}
         showCloseButton={false}
       >
@@ -264,7 +264,7 @@ export default function PunDetailDialog(props: {
           </DialogHeader>
         </VisuallyHidden>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-9">
           <div className="flex justify-between items-center">
             <div>
               <Button
