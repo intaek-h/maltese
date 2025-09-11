@@ -201,7 +201,7 @@ export const createPun = mutation({
 
     const publicKey = uuidv4();
 
-    const punId = await ctx.db.insert("puns", {
+    await ctx.db.insert("puns", {
       publicKey,
       firstRow: args.firstRow || undefined,
       secondRow: args.secondRow || undefined,

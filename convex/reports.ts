@@ -45,7 +45,7 @@ export const reportPun = mutation({
     });
 
     const updated = await ctx.db.get(pun._id);
-    if (updated) {
+    if (updated?.status === "visible") {
       await visiblePunsAggregate.replaceOrInsert(ctx, pun, updated);
     }
 
