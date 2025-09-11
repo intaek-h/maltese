@@ -31,7 +31,18 @@ export default clerkMiddleware(async (auth, req) => {
     });
   }
 
-  if (isProtectedRoute(req)) await auth.protect();
+  const clerkUser = await auth();
+  const userId = clerkUser.userId;
+  const userRole = clerkUser.sessionClaims?.metadata?.role;
+
+  if (isProtectedRoute(req) && !userId) {
+    await auth.protect();
+  }
+
+  if (isProtectedRoute(req) && userRole !== "admin") {
+    const url = new URL("/", req.url);
+    return NextResponse.redirect(url);
+  }
 
   return res;
 });
