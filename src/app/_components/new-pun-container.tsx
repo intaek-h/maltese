@@ -18,6 +18,12 @@ export default function NewPunContainer(props: {
   const puns = usePreloadedQuery(props.puns);
   const animals = usePreloadedQuery(props.animals);
 
+  animals.sort((a, b) => {
+    if (a.name === "구운 말티즈") return -1;
+    if (b.name === "구운 말티즈") return 1;
+    return 0;
+  });
+
   const [isPending, startTransition] = useTransition();
 
   const [_, setShouldShowPunLoader] = useAtom(shouldShowPunLoaderAtom);
