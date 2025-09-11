@@ -109,7 +109,8 @@ export default function NewPunFormDialog({
 
           <div className="relative h-[50vh] overflow-hidden">
             <div className="flex h-full w-full flex-col items-center justify-center gap-4">
-              <div className="flex flex-col items-center">
+              {/* TODO */}
+              {/* <div className="flex flex-col items-center">
                 <Drawer>
                   <DrawerTrigger>
                     <p className="text-secondary text-lg font-semibold underline underline-offset-4">
@@ -131,7 +132,7 @@ export default function NewPunFormDialog({
                     </DrawerFooter>
                   </DrawerContent>
                 </Drawer>
-              </div>
+              </div> */}
               <NewPunForm />
             </div>
           </div>
