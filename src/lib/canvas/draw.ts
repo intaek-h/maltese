@@ -447,8 +447,11 @@ export function drawScene(
       options?.likeBarSizeAdjustPx ?? 0,
     );
 
-    // Draw status badge for highlighted pun, positioned below the like bar
-    if (moving.isHighlighted) {
+    // Draw status badge only for highlighted puns that are queued or hidden
+    if (
+      moving.isHighlighted &&
+      (moving.status === "queued" || moving.status === "hidden")
+    ) {
       drawStatusBadge(ctx, canvas, moving, likeBarHeight);
     }
 
@@ -597,6 +600,8 @@ export function measureLikeBarUsedHeight(moving: MovingAnimal): number {
 // Only applies to highlighted sprites where the badge is drawn.
 export function measureStatusBadgeUsedHeight(moving: MovingAnimal): number {
   if (!moving.isHighlighted) return 0;
+  const status = moving.status;
+  if (!(status === "queued" || status === "hidden")) return 0;
   // Keep in sync with drawStatusBadge constants
   const BADGE_GAP_BELOW_SPRITE = 6; // same as `gap` in drawStatusBadge
   const BADGE_BOX_HEIGHT = 18; // same computed height in drawStatusBadge
