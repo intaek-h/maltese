@@ -25,14 +25,12 @@ export default function Page() {
         <Table className="border ">
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[80] text-right border-r"></TableHead>
               <TableHead className="w-[200px] font-semibold border-r">
                 첫번째 행
               </TableHead>
               <TableHead className="w-[200px] font-semibold border-r">
                 두번째 행
-              </TableHead>
-              <TableHead className="w-[80px] font-semibold border-r">
-                상태
               </TableHead>
               <TableHead className="w-[60px] text-right font-semibold border-r">
                 붐업
@@ -40,13 +38,18 @@ export default function Page() {
               <TableHead className="w-[60px] text-right font-semibold border-r">
                 신고
               </TableHead>
-              <TableHead className="text-right"></TableHead>
+              <TableHead className="text-right font-semibold border-r">
+                상태
+              </TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {puns?.map((p) => (
               <TableRow key={p._id}>
+                <TableCell className="text-right border-r">
+                  <Action id={p._id} />
+                </TableCell>
                 <TableCell className="font-medium border-r">
                   {p.firstRow}
                 </TableCell>
@@ -54,16 +57,13 @@ export default function Page() {
                   {p.secondRow}
                 </TableCell>
                 <TableCell className="text-right border-r">
-                  {p.status}
-                </TableCell>
-                <TableCell className="text-right border-r">
                   {p.likeCount}
                 </TableCell>
                 <TableCell className="text-right border-r">
                   {p.reportCount}
                 </TableCell>
-                <TableCell className="text-right">
-                  <Action id={p._id} />
+                <TableCell className="text-right border-r">
+                  {p.status}
                 </TableCell>
               </TableRow>
             ))}
