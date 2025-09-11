@@ -2,8 +2,7 @@
 
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { Info, Link, Share } from "lucide-react";
-import Image from "next/image";
+import { Download, Info, Link, Share } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "react-use";
 import { useDebouncedCallback } from "use-debounce";
@@ -325,29 +324,35 @@ export default function PunDetailDialog(props: {
             </div>
           </div>
 
-          {moving?.likeCount && moving.likeCount >= 5 ? (
-            <div
-              className="text-center flex gap-0.5 items-center justify-center"
-              aria-hidden
-            >
-              {Array.from({ length: Math.floor(moving.likeCount / 5) }).map(
-                (_, index) => (
-                  <Image
-                    // biome-ignore lint/suspicious/noArrayIndexKey: then waht?
-                    key={index}
-                    src="/icons/pixel-coin-rotate.gif"
-                    width={24}
-                    height={24}
-                    alt=""
-                    unoptimized
-                  />
-                ),
-              )}
-            </div>
-          ) : null}
-
-          <div className="w-full">
+          <div className="w-full relative">
             <canvas ref={previewCanvasRef} className="m-auto" />
+            <Button
+              variant="inline"
+              size="sm"
+              className="text-background! absolute right-0 bottom-0 p-1! bg-background/20"
+              onClick={async () => {
+                const c = previewCanvasRef.current;
+                if (!c) return;
+                try {
+                  const blob = await new Promise<Blob | null>((resolve) =>
+                    c.toBlob(resolve, "image/png"),
+                  );
+                  if (!blob) return;
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `말장난 말티즈 - ${formatPun(moving?.input1, moving?.input2)}.png`;
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  URL.revokeObjectURL(url);
+                } catch (error) {
+                  console.error(error);
+                }
+              }}
+            >
+              <Download className="size-4" />
+            </Button>
           </div>
 
           <div className="flex items-center justify-between gap-4 mt-auto">
