@@ -8,7 +8,6 @@ import { useState, useTransition } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import NewPunForm from "@/app/_components/new-pun-form";
 import NewPunSavingDialog from "@/app/_components/new-pun-saving-dialog";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -17,16 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import LegoButton from "@/components/ui/lego-button";
 import { createPunServerAction } from "@/lib/server-actions/pun/actions";
 import { animalId, firstRow, secondRow } from "@/store/pun";
@@ -49,7 +38,7 @@ export default function NewPunFormDialog({
   const [row2, setRow2] = useAtom(secondRow);
   const [animal, setAnimal] = useAtom(animalId);
 
-  const [isPending, startTransition] = useTransition();
+  const [isPageTransitionPending, startTransition] = useTransition();
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -143,11 +132,17 @@ export default function NewPunFormDialog({
                 <ArrowLeftIcon className="mr-2" />
                 뒤로
               </LegoButton>
-              <LegoButton onClick={submitPun}>저장하기</LegoButton>
+              <LegoButton
+                onClick={submitPun}
+                loading={isSaving}
+                disabled={row1.length === 0 && row2.length === 0}
+              >
+                저장하기
+              </LegoButton>
             </div>
           </div>
 
-          <NewPunSavingDialog isOpen={isSaving || isPending} />
+          <NewPunSavingDialog isOpen={isSaving || isPageTransitionPending} />
         </div>
       </DialogContent>
     </Dialog>

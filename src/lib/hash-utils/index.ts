@@ -4,7 +4,7 @@ export function computeContentHash(
   firstRow: string,
   secondRow: string,
 ): string {
-  const canonical = `${firstRow}\n${secondRow}`.trim();
+  const canonical = `${firstRow.trim()}${secondRow.trim()}`.trim();
   return crypto.createHash("sha256").update(canonical).digest("hex");
 }
 

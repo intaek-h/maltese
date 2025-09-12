@@ -2,7 +2,7 @@
 
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { Download, Info, Link, Share } from "lucide-react";
+import { Download, Link, Share } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "react-use";
 import { useDebouncedCallback } from "use-debounce";
@@ -32,7 +32,6 @@ import type { MovingAnimal } from "@/lib/canvas/types";
 import { copyTextToClipboard } from "@/lib/clipboard-utils";
 import { formatPun } from "@/lib/pun-utils";
 import { likePunServerAction } from "@/lib/server-actions/likes/actions";
-import { reportPunServerAction } from "@/lib/server-actions/reports/actions";
 
 export default function PunDetailDialog(props: {
   open: boolean;
@@ -44,10 +43,6 @@ export default function PunDetailDialog(props: {
 
   const [likeDisabled, setLikeDisabled] = useLocalStorage<string[]>(
     LS.likeDisabledPunPublicKeys,
-    [],
-  );
-  const [reportDisabled, setReportDisabled] = useLocalStorage<string[]>(
-    LS.reportDisabledPunPublicKeys,
     [],
   );
 
@@ -217,37 +212,6 @@ export default function PunDetailDialog(props: {
     }
   }, 100);
 
-  const [isReportPunPending, setIsReportPunPending] = useState(false);
-  const reportPunDebounced = useDebouncedCallback(async (pubKey?: string) => {
-    try {
-      if (!pubKey) return;
-
-      const res = await reportPunServerAction({
-        punPublicKey: pubKey,
-      });
-
-      customToast(
-        {
-          title: res.message,
-        },
-        { duration: 2000 },
-      );
-
-      const arr = reportDisabled || [];
-      setReportDisabled([...arr, pubKey]);
-    } catch (error) {
-      console.error(error);
-      customToast(
-        {
-          title: "오류가 발생했습니다.",
-        },
-        { duration: 2000 },
-      );
-    } finally {
-      setIsReportPunPending(false);
-    }
-  }, 100);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -309,50 +273,37 @@ export default function PunDetailDialog(props: {
               <Button
                 variant="inline"
                 size="sm"
-                loading={isReportPunPending}
                 className="text-background!"
                 tabIndex={-1}
-                disabled={reportDisabled?.includes(moving?.publicKey || "")}
-                onClick={() => {
-                  setIsReportPunPending(true);
-                  reportPunDebounced(moving?.publicKey);
+                onClick={async () => {
+                  const c = previewCanvasRef.current;
+                  if (!c) return;
+                  try {
+                    const blob = await new Promise<Blob | null>((resolve) =>
+                      c.toBlob(resolve, "image/png"),
+                    );
+                    if (!blob) return;
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `말장난 말티즈 - ${formatPun(moving?.input1, moving?.input2)}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                  } catch (error) {
+                    console.error(error);
+                  }
                 }}
               >
-                신고하기
-                <Info className="size-3" />
+                이미지 다운로드
+                <Download className="size-3" />
               </Button>
             </div>
           </div>
 
           <div className="w-full relative">
             <canvas ref={previewCanvasRef} className="m-auto" />
-            <Button
-              variant="inline"
-              size="sm"
-              className="text-background! absolute right-0 bottom-0 p-1! bg-background/20"
-              onClick={async () => {
-                const c = previewCanvasRef.current;
-                if (!c) return;
-                try {
-                  const blob = await new Promise<Blob | null>((resolve) =>
-                    c.toBlob(resolve, "image/png"),
-                  );
-                  if (!blob) return;
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = `말장난 말티즈 - ${formatPun(moving?.input1, moving?.input2)}.png`;
-                  document.body.appendChild(a);
-                  a.click();
-                  a.remove();
-                  URL.revokeObjectURL(url);
-                } catch (error) {
-                  console.error(error);
-                }
-              }}
-            >
-              <Download className="size-4" />
-            </Button>
           </div>
 
           <div className="flex items-center justify-between gap-4 mt-auto">
