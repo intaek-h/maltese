@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import { JotaiProvider } from "@/components/providers/jotai-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -33,6 +34,8 @@ export default function RootLayout({
             <div id="dialog-root" />
 
             <div id="toast-root" />
+
+            <Analytics />
           </JotaiProvider>
         </ConvexClientProvider>
       </body>
