@@ -7,6 +7,8 @@ import DiscordLogger from "../discord";
 
 export const notifyPunQueueStatus = internalAction({
   handler: async (ctx) => {
+    if (process.env.CONVEX_ENV !== "production") return;
+
     const puns = await ctx.runQuery(internal.puns._getQueuedPuns);
 
     const logger = new DiscordLogger(
