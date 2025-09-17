@@ -8,7 +8,10 @@
  * @module
  */
 
+import type * as actions_discord from "../actions/discord.js";
 import type * as animals from "../animals.js";
+import type * as crons from "../crons.js";
+import type * as discord from "../discord.js";
 import type * as likes from "../likes.js";
 import type * as puns from "../puns.js";
 import type * as reports from "../reports.js";
@@ -30,7 +33,10 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "actions/discord": typeof actions_discord;
   animals: typeof animals;
+  crons: typeof crons;
+  discord: typeof discord;
   likes: typeof likes;
   puns: typeof puns;
   reports: typeof reports;

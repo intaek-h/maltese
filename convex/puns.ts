@@ -6,7 +6,7 @@ import { UUIDv4 } from "uuid-v4-validator";
 import { shuffle } from "../src/lib/pun-utils";
 import { components } from "./_generated/api";
 import type { DataModel } from "./_generated/dataModel";
-import { mutation, query } from "./_generated/server";
+import { internalQuery, mutation, query } from "./_generated/server";
 
 export const visiblePunsAggregate = new TableAggregate<{
   DataModel: DataModel;
@@ -23,6 +23,16 @@ export const getQueuedPuns = query({
 
     if (!user) return null;
 
+    return await ctx.db
+      .query("puns")
+      .withIndex("by_status", (q) => q.eq("status", "queued"))
+      .take(50);
+  },
+});
+
+export const _getQueuedPuns = internalQuery({
+  args: {},
+  handler: async (ctx) => {
     return await ctx.db
       .query("puns")
       .withIndex("by_status", (q) => q.eq("status", "queued"))
