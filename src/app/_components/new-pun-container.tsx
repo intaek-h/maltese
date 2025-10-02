@@ -39,7 +39,7 @@ export default function NewPunContainer(props: {
   }, [isPending, setShouldShowPunLoader]);
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4 transition-opacity hover:!opacity-100 duration-300 animate-[fade-to-opacity_3s_ease-in-out_3s_forwards]">
+    <div className="grid grid-cols-2 gap-4 sm:flex sm:gap-4">
       <LegoButton
         className="w-full sm:w-auto order-2 sm:order-none"
         variant="secondary"

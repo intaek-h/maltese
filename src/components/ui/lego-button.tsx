@@ -18,6 +18,13 @@ const legoButtonVariants = cva(
           "bg-[#008542] text-white before:bg-[#008542] before:shadow-[0_-4px_rgb(21_108_0_/_50%)_inset,0_4px_rgb(100_253_31_/_99%)_inset,-4px_0_rgb(100_253_31_/_50%)_inset,4px_0_rgb(21_108_0_/_50%)_inset] hover:before:shadow-[0_-4px_rgb(0_0_0_/_50%)_inset,0_4px_rgb(255_255_255_/_20%)_inset,-4px_0_rgb(255_255_255_/_20%)_inset,4px_0_rgb(0_0_0_/_50%)_inset] disabled:bg-neutral-400 disabled:text-white/80 disabled:before:bg-neutral-400 disabled:before:shadow-[0_-4px_rgb(120_120_120_/_50%)_inset,0_4px_rgb(255_255_255_/_70%)_inset,-4px_0_rgb(200_200_200_/_50%)_inset,4px_0_rgb(120_120_120_/_50%)_inset] disabled:after:shadow-[0_4px_0_0_rgb(0_0_0_/_10%)] aria-disabled:bg-neutral-400 aria-disabled:text-white/80 aria-disabled:before:bg-neutral-400 aria-disabled:before:shadow-[0_-4px_rgb(120_120_120_/_50%)_inset,0_4px_rgb(255_255_255_/_70%)_inset,-4px_0_rgb(200_200_200_/_50%)_inset,4px_0_rgb(120_120_120_/_50%)_inset] aria-disabled:after:shadow-[0_4px_0_0_rgb(0_0_0_/_10%)]",
         secondary:
           "bg-white text-black before:bg-white before:shadow-[0_-4px_rgb(220_220_220_/_80%)_inset,0_4px_rgb(255_255_255_/_99%)_inset,-4px_0_rgb(255_255_255_/_80%)_inset,4px_0_rgb(220_220_220_/_80%)_inset] hover:before:shadow-[0_-4px_rgb(0_0_0_/_20%)_inset,0_4px_rgb(255_255_255_/_80%)_inset,-4px_0_rgb(255_255_255_/_80%)_inset,4px_0_rgb(0_0_0_/_20%)_inset] disabled:bg-neutral-200 disabled:text-neutral-500 disabled:before:bg-neutral-200 disabled:before:shadow-[0_-4px_rgb(180_180_180_/_60%)_inset,0_4px_rgb(255_255_255_/_80%)_inset,-4px_0_rgb(230_230_230_/_60%)_inset,4px_0_rgb(180_180_180_/_60%)_inset] disabled:after:shadow-[0_4px_0_0_rgb(0_0_0_/_8%)] aria-disabled:bg-neutral-200 aria-disabled:text-neutral-500 aria-disabled:before:bg-neutral-200 aria-disabled:before:shadow-[0_-4px_rgb(180_180_180_/_60%)_inset,0_4px_rgb(255_255_255_/_80%)_inset,-4px_0_rgb(230_230_230_/_60%)_inset,4px_0_rgb(180_180_180_/_60%)_inset] aria-disabled:after:shadow-[0_4px_0_0_rgb(0_0_0_/_8%)]",
+        orange:
+          "bg-[#f97316] text-white before:bg-[#f97316] before:shadow-[0_-4px_rgb(180_52_3_/_50%)_inset,0_4px_rgb(255_220_180_/_99%)_inset,-4px_0_rgb(255_220_180_/_50%)_inset,4px_0_rgb(180_52_3_/_50%)_inset] hover:before:shadow-[0_-4px_rgb(0_0_0_/_50%)_inset,0_4px_rgb(255_255_255_/_20%)_inset,-4px_0_rgb(255_255_255_/_20%)_inset,4px_0_rgb(0_0_0_/_50%)_inset] disabled:bg-neutral-400 disabled:text-white/80 disabled:before:bg-neutral-400 disabled:before:shadow-[0_-4px_rgb(120_120_120_/_50%)_inset,0_4px_rgb(255_255_255_/_70%)_inset,-4px_0_rgb(200_200_200_/_50%)_inset,4px_0_rgb(120_120_120_/_50%)_inset] disabled:after:shadow-[0_4px_0_0_rgb(0_0_0_/_10%)] aria-disabled:bg-neutral-400 aria-disabled:text-white/80 aria-disabled:before:bg-neutral-400 aria-disabled:before:shadow-[0_-4px_rgb(120_120_120_/_50%)_inset,0_4px_rgb(255_255_255_/_70%)_inset,-4px_0_rgb(200_200_200_/_50%)_inset,4px_0_rgb(120_120_120_/_50%)_inset] aria-disabled:after:shadow-[0_4px_0_0_rgb(0_0_0_/_10%)]",
+      },
+      shape: {
+        default: "",
+        circle:
+          "rounded-full p-0 w-14 h-14 before:rounded-full after:rounded-full",
       },
       loading: {
         true: "",
@@ -25,6 +32,7 @@ const legoButtonVariants = cva(
     },
     defaultVariants: {
       variant: "primary",
+      shape: "default",
     },
   },
 );
@@ -32,6 +40,7 @@ const legoButtonVariants = cva(
 export default function LegoButton({
   className,
   variant,
+  shape,
   asChild = false,
   style,
   loading = false,
@@ -47,7 +56,7 @@ export default function LegoButton({
 
   return (
     <Comp
-      className={cn(legoButtonVariants({ variant, className, loading }))}
+      className={cn(legoButtonVariants({ variant, className, loading, shape }))}
       disabled={disabled || loading}
       style={{ whiteSpace: "unset", ...(style ?? {}) }}
       {...props}

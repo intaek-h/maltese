@@ -1,16 +1,19 @@
 import { fetchQuery, preloadQuery } from "convex/nextjs";
 import type { FunctionReturnType } from "convex/server";
+import { Menu } from "lucide-react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { UUIDv4 } from "uuid-v4-validator";
 import Canvas from "@/app/_components/canvas";
 import NewPunContainer from "@/app/_components/new-pun-container";
+import LegoButton from "@/components/ui/lego-button";
 import { DEFAULT_ANIMALS_IN_CANVAS } from "@/constants/configs";
 import { COOKIES } from "@/constants/cookies";
 import { formatPun } from "@/lib/pun-utils";
 import { api } from "../../convex/_generated/api";
 import { CanvasBackground } from "./_components/canvas-background";
 import { PunLoader } from "./_components/pun-loader";
+import { SiteMenuSheet } from "./_components/site-menu-sheet";
 
 type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -86,8 +89,25 @@ export default async function Home({ searchParams }: Props) {
         highlightedPun={highlightedPun}
       />
 
-      <div className="absolute sm:bottom-24 bottom-12 left-1/2 -translate-x-1/2">
+      {/* show on mobile */}
+      <div className="absolute sm:hidden block sm:bottom-24 bottom-12 left-6 transition-opacity hover:!opacity-100 duration-300 animate-[fade-to-opacity_3s_ease-in-out_3s_forwards]">
+        <SiteMenuSheet>
+          <LegoButton variant="orange" shape="default">
+            <Menu />
+          </LegoButton>
+        </SiteMenuSheet>
+      </div>
+
+      <div className="absolute sm:bottom-24 bottom-12 left-1/2 -translate-x-1/2 transition-opacity hover:!opacity-100 duration-300 animate-[fade-to-opacity_3s_ease-in-out_3s_forwards]">
         <NewPunContainer puns={paginatedPuns} animals={animalImages} />
+
+        <div className="absolute -left-[100px] top-0 hidden sm:block bottom-0">
+          <SiteMenuSheet>
+            <LegoButton variant="orange" shape="default" className="h-full">
+              <Menu />
+            </LegoButton>
+          </SiteMenuSheet>
+        </div>
       </div>
 
       <PunLoader />
