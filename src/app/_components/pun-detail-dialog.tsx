@@ -284,8 +284,77 @@ export default function PunDetailDialog(props: {
                   const c = previewCanvasRef.current;
                   if (!c) return;
                   try {
+                    // Card dimensions
+                    const cardWidth = 380;
+                    const cardHeight = 560;
+
+                    // Create offscreen canvas for the card
+                    const cardCanvas = document.createElement("canvas");
+                    cardCanvas.width = cardWidth * 2; // High res for quality
+                    cardCanvas.height = cardHeight * 2;
+                    const ctx = cardCanvas.getContext("2d");
+                    if (!ctx) return;
+
+                    ctx.scale(2, 2);
+
+                    // Draw rounded rect clip path
+                    const radius = 12;
+                    ctx.beginPath();
+                    ctx.moveTo(radius, 0);
+                    ctx.lineTo(cardWidth - radius, 0);
+                    ctx.quadraticCurveTo(cardWidth, 0, cardWidth, radius);
+                    ctx.lineTo(cardWidth, cardHeight - radius);
+                    ctx.quadraticCurveTo(cardWidth, cardHeight, cardWidth - radius, cardHeight);
+                    ctx.lineTo(radius, cardHeight);
+                    ctx.quadraticCurveTo(0, cardHeight, 0, cardHeight - radius);
+                    ctx.lineTo(0, radius);
+                    ctx.quadraticCurveTo(0, 0, radius, 0);
+                    ctx.closePath();
+                    ctx.clip();
+
+                    // Load and draw background image
+                    const bgImg = new Image();
+                    bgImg.crossOrigin = "anonymous";
+                    bgImg.src = "/backgrounds/2.jpg";
+
+                    await new Promise<void>((resolve) => {
+                      bgImg.onload = () => resolve();
+                      bgImg.onerror = () => resolve();
+                    });
+
+                    // Draw background (cover mode)
+                    if (bgImg.complete && bgImg.naturalWidth > 0) {
+                      const imgRatio = bgImg.naturalWidth / bgImg.naturalHeight;
+                      const cardRatio = cardWidth / cardHeight;
+                      let drawW: number;
+                      let drawH: number;
+                      let offsetX = 0;
+                      let offsetY = 0;
+
+                      if (imgRatio > cardRatio) {
+                        drawH = cardHeight;
+                        drawW = cardHeight * imgRatio;
+                        offsetX = (cardWidth - drawW) / 2;
+                      } else {
+                        drawW = cardWidth;
+                        drawH = cardWidth / imgRatio;
+                        offsetY = (cardHeight - drawH) / 2;
+                      }
+                      ctx.drawImage(bgImg, offsetX, offsetY, drawW, drawH);
+                    } else {
+                      ctx.fillStyle = "#f0f0f0";
+                      ctx.fillRect(0, 0, cardWidth, cardHeight);
+                    }
+
+                    // Draw the preview canvas content (animal with pun) centered and scaled up
+                    const previewSize = 340;
+                    const previewX = (cardWidth - previewSize) / 2;
+                    const previewY = (cardHeight - previewSize) / 2;
+                    ctx.drawImage(c, previewX, previewY, previewSize, previewSize);
+
+                    // Convert to blob and download
                     const blob = await new Promise<Blob | null>((resolve) =>
-                      c.toBlob(resolve, "image/png"),
+                      cardCanvas.toBlob(resolve, "image/png"),
                     );
                     if (!blob) return;
                     const url = URL.createObjectURL(blob);
