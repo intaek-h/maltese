@@ -424,6 +424,12 @@ export function drawScene(
 
   for (const moving of movingAnimals) {
     if (moving.isImageLoaded) {
+      // Add shadow to the animal image
+      ctx.save();
+      ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetX = 4;
+      ctx.shadowOffsetY = 6;
       ctx.drawImage(
         moving.imageElement,
         moving.x,
@@ -431,6 +437,7 @@ export function drawScene(
         moving.width,
         moving.height,
       );
+      ctx.restore();
     } else {
       ctx.fillStyle = "#ddd";
       ctx.fillRect(moving.x, moving.y, moving.width, moving.height);

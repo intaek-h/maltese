@@ -215,8 +215,13 @@ export default function PunDetailDialog(props: {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="w-[380px] h-[560px] bg-background/25 border-[#0000001a] border-2 shadow-2xl gap-4 rounded-[16px] p-8"
-        style={{ filter: `drop-shadow(2px 4px 6px #00000050)` }}
+        className="w-[380px] h-[560px] border-[#0000001a] shadow-2xl gap-4 rounded-[12px] p-8"
+        style={{
+          backgroundImage: "url('/backgrounds/2.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          filter: "drop-shadow(2px 4px 6px #00000050)",
+        }}
         showCloseButton={false}
       >
         <VisuallyHidden>
