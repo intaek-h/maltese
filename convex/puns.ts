@@ -40,6 +40,22 @@ export const _getQueuedPuns = internalQuery({
   },
 });
 
+// For sitemap generation - returns all visible pun keys
+export const getAllVisiblePunKeys = query({
+  args: {},
+  handler: async (ctx) => {
+    const puns = await ctx.db
+      .query("puns")
+      .withIndex("by_status", (q) => q.eq("status", "visible"))
+      .collect();
+
+    return puns.map((pun) => ({
+      publicKey: pun.publicKey,
+      updatedAt: pun.updatedAt,
+    }));
+  },
+});
+
 export const changePunStatus = mutation({
   args: {
     punId: v.id("puns"),
