@@ -24,33 +24,47 @@ export async function generateMetadata({
 }: Props): Promise<Metadata> {
   const punPublicKey = ((await searchParams).key || "") as string;
 
+  // Base page - no specific pun key
   if (!punPublicKey) {
     return {
       title: "말장난 말티즈",
-      description: "말난장 말치즈",
+      description: "말장난 고수만 입장",
+      openGraph: {
+        title: "말장난 말티즈",
+        description: "말장난 고수만 입장",
+        url: "https://maltese.app",
+      },
     };
   }
 
-  let highlightedPun: FunctionReturnType<
-    typeof api.puns.getPunByPubKey
-  > | null = null;
-
+  // Validate UUID format
   const isUUID = UUIDv4.validate(punPublicKey);
 
   if (!isUUID) {
     return {
       title: "말장난 말티즈",
-      description: "말난장 말치즈",
+      description: "말장난 고수만 입장",
     };
   }
 
-  highlightedPun = await fetchQuery(api.puns.getPunByPubKey, {
+  // Fetch the specific pun for dynamic metadata
+  const highlightedPun = await fetchQuery(api.puns.getPunByPubKey, {
     publicKey: punPublicKey,
   });
 
+  const punText = formatPun(highlightedPun?.firstRow, highlightedPun?.secondRow);
+  const title = punText ? `${punText}` : "말장난 말티즈";
+  const description = punText || "말장난 고수만 입장";
+
+  // Shared pun page - each pun gets its own indexed page
   return {
-    title: `말장난 말티즈 - ${formatPun(highlightedPun?.firstRow, highlightedPun?.secondRow)}`,
-    description: "말난장 말치즈",
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `https://maltese.app/?key=${punPublicKey}`,
+    },
   };
 }
 
